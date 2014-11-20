@@ -1,0 +1,193 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{5A2613A7-E9D6-45D5-BE71-C30BF970DFD8}</ProjectGuid>
+    <RootNamespace>DD_042</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>C:\Users\Was\Documents\Visual Studio 2013\Projects\DD\DD_0.4.2\SFML;C:\Users\Was\Documents\Visual Studio 2013\Projects\DD\DD_0.4.2\SDL;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Was\Documents\Visual Studio 2013\Projects\DD\DD_0.4.2\SFML\debug lib x32;C:\Users\Was\Documents\Visual Studio 2013\Projects\DD\DD_0.4.2\SDL\debug lib x32;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>C:\Users\Was\Documents\Visual Studio 2013\Projects\DD\DD_0.4.2\SFML;C:\Users\Was\Documents\Visual Studio 2013\Projects\DD\DD_0.4.2\SDL;$(IncludePath)</IncludePath>
+    <LibraryWPath>$(LibraryWPath)</LibraryWPath>
+    <LibraryPath>C:\Users\Was\Documents\Visual Studio 2013\Projects\DD\DD_0.4.2\SFML\release lib x32;C:\Users\Was\Documents\Visual Studio 2013\Projects\DD\DD_0.4.2\SDL\release lib x32;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>SDL2.lib;SDL2_image.lib;SDL2_ttf.lib;SDL2main.lib;sfml-main-d.lib;sfml-system-d.lib;sfml-graphics-d.lib;sfml-audio-d.lib;sfml-window-d.lib;sfml-network-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>SDL2.lib;SDL2_image.lib;SDL2_ttf.lib;SDL2main.lib;sfml-main.lib;sfml-system.lib;sfml-graphics.lib;sfml-audio.lib;sfml-window.lib;sfml-network.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="src\CGame.h" />
+    <ClInclude Include="src\Data\Const.h" />
+    <ClInclude Include="src\Data\Defines.h" />
+    <ClInclude Include="src\Data\Enums.h" />
+    <ClInclude Include="src\Data\Globals.h" />
+    <ClInclude Include="src\Input\CInput.h" />
+    <ClInclude Include="src\Input\CSDLInput.h" />
+    <ClInclude Include="src\Input\CSFMLInput.h" />
+    <ClInclude Include="src\Input\InputData.h" />
+    <ClInclude Include="src\IO\IOFunctions.h" />
+    <ClInclude Include="src\Logic\CLogic.h" />
+    <ClInclude Include="src\Logic\Entity\CEntity.h" />
+    <ClInclude Include="src\Logic\Entity\CEntityManager.h" />
+    <ClInclude Include="src\Logic\Entity\CPlayer.h" />
+    <ClInclude Include="src\Logic\Entity\EntityData.h" />
+    <ClInclude Include="src\Logic\Entity\EntityWrapper.h" />
+    <ClInclude Include="src\Logic\Entity\Item\CEquipped.h" />
+    <ClInclude Include="src\Logic\Entity\Item\CItemManager.h" />
+    <ClInclude Include="src\Logic\Entity\Item\CWeapon.h" />
+    <ClInclude Include="src\Logic\Entity\Item\CWeaponAttack.h" />
+    <ClInclude Include="src\Logic\Entity\Item\ItemEnums.h" />
+    <ClInclude Include="src\Logic\Entity\Item\ItemWrapper.h" />
+    <ClInclude Include="src\Logic\GUI\CButton.h" />
+    <ClInclude Include="src\Logic\GUI\CGUI.h" />
+    <ClInclude Include="src\Logic\GUI\CGUIAction.h" />
+    <ClInclude Include="src\Logic\GUI\CMenu.h" />
+    <ClInclude Include="src\Logic\GUI\CSelectBox.h" />
+    <ClInclude Include="src\Logic\GUI\CTextBox.h" />
+    <ClInclude Include="src\Logic\GUI\CWidget.h" />
+    <ClInclude Include="src\Logic\GUI\CWindow.h" />
+    <ClInclude Include="src\Logic\GUI\EnumGui.h" />
+    <ClInclude Include="src\Logic\GUI\StructsGUI.h" />
+    <ClInclude Include="src\Logic\Map\CMap.h" />
+    <ClInclude Include="src\Logic\Map\CMapEditor.h" />
+    <ClInclude Include="src\Logic\Map\CMapInGame.h" />
+    <ClInclude Include="src\Logic\Map\MapData.h" />
+    <ClInclude Include="src\Logic\Physics\CCollision.h" />
+    <ClInclude Include="src\Logic\Physics\CCollisionData.h" />
+    <ClInclude Include="src\Logic\Physics\CMovement.h" />
+    <ClInclude Include="src\Logic\Physics\CollisionFunctions.h" />
+    <ClInclude Include="src\Logic\Spell\CSpell.h" />
+    <ClInclude Include="src\Logic\Spell\CSpellManager.h" />
+    <ClInclude Include="src\Logic\Spell\SpellData.h" />
+    <ClInclude Include="src\Logic\Spell\SpellWrapper.h" />
+    <ClInclude Include="src\Logic\State\CState.h" />
+    <ClInclude Include="src\Logic\State\StateData.h" />
+    <ClInclude Include="src\Message\CMessage.h" />
+    <ClInclude Include="src\Message\MessageData.h" />
+    <ClInclude Include="src\Render\CRender.h" />
+    <ClInclude Include="src\Render\CRenderManager.h" />
+    <ClInclude Include="src\Render\CSDLImage.h" />
+    <ClInclude Include="src\Render\CSDLRender.h" />
+    <ClInclude Include="src\Render\CSFMLImage.h" />
+    <ClInclude Include="src\Render\CSFMLRender.h" />
+    <ClInclude Include="src\Tools\CSDLTimer.h" />
+    <ClInclude Include="src\Tools\debug.h" />
+    <ClInclude Include="src\Tools\Functions.h" />
+    <ClInclude Include="src\Tools\ITimer.h" />
+    <ClInclude Include="src\Tools\Log.h" />
+    <ClInclude Include="src\Tools\MessageBox.h" />
+    <ClInclude Include="src\Tools\StringWrapper.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\CGame.cpp" />
+    <ClCompile Include="src\Data\Globals.cpp" />
+    <ClCompile Include="src\Input\CInput.cpp" />
+    <ClCompile Include="src\Input\CSDLInput.cpp" />
+    <ClCompile Include="src\Input\CSFMLInput.cpp" />
+    <ClCompile Include="src\IO\IOFunctions.cpp" />
+    <ClCompile Include="src\Logic\CLogic.cpp" />
+    <ClCompile Include="src\Logic\Entity\CEntity.cpp" />
+    <ClCompile Include="src\Logic\Entity\CEntityManager.cpp" />
+    <ClCompile Include="src\Logic\Entity\CPlayer.cpp" />
+    <ClCompile Include="src\Logic\Entity\Item\CEquipped.cpp" />
+    <ClCompile Include="src\Logic\Entity\Item\CItemManager.cpp" />
+    <ClCompile Include="src\Logic\Entity\Item\CWeapon.cpp" />
+    <ClCompile Include="src\Logic\Entity\Item\CWeaponAttack.cpp" />
+    <ClCompile Include="src\Logic\GUI\CButton.cpp" />
+    <ClCompile Include="src\Logic\GUI\CGUI.cpp" />
+    <ClCompile Include="src\Logic\GUI\CGUIAction.cpp" />
+    <ClCompile Include="src\Logic\GUI\CMenu.cpp" />
+    <ClCompile Include="src\Logic\GUI\CSelectBox.cpp" />
+    <ClCompile Include="src\Logic\GUI\CTextBox.cpp" />
+    <ClCompile Include="src\Logic\GUI\CWidget.cpp" />
+    <ClCompile Include="src\Logic\GUI\CWindow.cpp" />
+    <ClCompile Include="src\Logic\Map\CMap.cpp" />
+    <ClCompile Include="src\Logic\Map\CMapEditor.cpp" />
+    <ClCompile Include="src\Logic\Map\CMapInGame.cpp" />
+    <ClCompile Include="src\Logic\Physics\CCollision.cpp" />
+    <ClCompile Include="src\Logic\Physics\CMovement.cpp" />
+    <ClCompile Include="src\Logic\Physics\CollisionFunctions.cpp" />
+    <ClCompile Include="src\Logic\Spell\CSpell.cpp" />
+    <ClCompile Include="src\Logic\Spell\CSpellManager.cpp" />
+    <ClCompile Include="src\Logic\State\CState.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Message\CMessage.cpp" />
+    <ClCompile Include="src\Render\CRender.cpp" />
+    <ClCompile Include="src\Render\CRenderManager.cpp" />
+    <ClCompile Include="src\Render\CSDLImage.cpp" />
+    <ClCompile Include="src\Render\CSDLRender.cpp" />
+    <ClCompile Include="src\Render\CSFMLImage.cpp" />
+    <ClCompile Include="src\Render\CSFMLRender.cpp" />
+    <ClCompile Include="src\Tools\CSDLTimer.cpp" />
+    <ClCompile Include="src\Tools\Functions.cpp" />
+    <ClCompile Include="src\Tools\Log.cpp" />
+    <ClCompile Include="src\Tools\MessageBox.cpp" />
+    <ClCompile Include="src\Tools\StringWrapper.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

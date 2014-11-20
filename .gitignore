@@ -1,0 +1,6 @@
+data/
+img/
+Debug/
+Release/
+SDL
+SFML
