@@ -543,7 +543,7 @@ void	CSFMLRender::VCreateGameMap(const _mapTileAll *map)
 
 	m_pMapTexture = DD_NEW sf::RenderTexture{};
 
-	if (map->currentMap == MapType::small_)
+	if (*map->currentMap == MapType::small_)
 	{
 		m_pMapTexture->create(MAP_WIDTH_SMALL, MAP_HEIGHT_SMALL);
 
@@ -555,7 +555,7 @@ void	CSFMLRender::VCreateGameMap(const _mapTileAll *map)
 			}
 		}
 	}
-	else if (map->currentMap == MapType::medium)
+	else if (*map->currentMap == MapType::medium)
 	{
 		m_pMapTexture->create(MAP_WIDTH_MEDIUM, MAP_HEIGHT_MEDIUM);
 
@@ -567,7 +567,7 @@ void	CSFMLRender::VCreateGameMap(const _mapTileAll *map)
 			}
 		}
 	}
-	else if (map->currentMap == MapType::big)
+	else if (*map->currentMap == MapType::big)
 	{
 		m_pMapTexture->create(MAP_WIDTH_BIG, MAP_HEIGHT_BIG);
 

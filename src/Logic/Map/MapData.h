@@ -48,7 +48,7 @@ struct _mapTileBig
 
 struct _mapTileAll
 {
-	MapType			currentMap;
+	MapType			*currentMap;
 	_mapTileSmall	*small_;
 	_mapTileMedium	*medium;
 	_mapTileBig		*big;

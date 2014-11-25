@@ -92,6 +92,7 @@
     <ClInclude Include="src\Logic\CLogic.h" />
     <ClInclude Include="src\Logic\Entity\CEntity.h" />
     <ClInclude Include="src\Logic\Entity\CEntityManager.h" />
+    <ClInclude Include="src\Logic\Entity\CPathFinding.h" />
     <ClInclude Include="src\Logic\Entity\CPlayer.h" />
     <ClInclude Include="src\Logic\Entity\EntityData.h" />
     <ClInclude Include="src\Logic\Entity\EntityWrapper.h" />
@@ -151,6 +152,7 @@
     <ClCompile Include="src\Logic\CLogic.cpp" />
     <ClCompile Include="src\Logic\Entity\CEntity.cpp" />
     <ClCompile Include="src\Logic\Entity\CEntityManager.cpp" />
+    <ClCompile Include="src\Logic\Entity\CPathFinding.cpp" />
     <ClCompile Include="src\Logic\Entity\CPlayer.cpp" />
     <ClCompile Include="src\Logic\Entity\Item\CEquipped.cpp" />
     <ClCompile Include="src\Logic\Entity\Item\CItemManager.cpp" />

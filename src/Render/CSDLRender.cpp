@@ -596,7 +596,7 @@ void	CSDLRender::VCreateGameMap(const _mapTileAll *map)
 	SDL_DestroyTexture(m_pMapTexture);
 	m_pMapTexture = nullptr;
 
-	if (map->currentMap == MapType::small_)
+	if (*map->currentMap == MapType::small_)
 	{
 		m_pMapTexture = SDL_CreateTexture(m_pRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, MAP_WIDTH_SMALL, MAP_HEIGHT_SMALL);
 
@@ -612,7 +612,7 @@ void	CSDLRender::VCreateGameMap(const _mapTileAll *map)
 
 		SDL_SetRenderTarget(m_pRenderer, nullptr);
 	}
-	else if (map->currentMap == MapType::medium)
+	else if (*map->currentMap == MapType::medium)
 	{
 		m_pMapTexture = SDL_CreateTexture(m_pRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, MAP_WIDTH_MEDIUM, MAP_HEIGHT_MEDIUM);
 
@@ -628,7 +628,7 @@ void	CSDLRender::VCreateGameMap(const _mapTileAll *map)
 
 		SDL_SetRenderTarget(m_pRenderer, nullptr);
 	}
-	else if (map->currentMap == MapType::big)
+	else if (*map->currentMap == MapType::big)
 	{
 		m_pMapTexture = SDL_CreateTexture(m_pRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, MAP_WIDTH_BIG, MAP_HEIGHT_BIG);
 

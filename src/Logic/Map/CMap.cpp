@@ -28,6 +28,7 @@ bool	CMap::Init()
 	m_currentMap.small_ = &m_mapSmall;
 	m_currentMap.medium = &m_mapMedium;
 	m_currentMap.big = &m_mapBig;
+	m_currentMap.currentMap = &m_selectedMap;
 
 	return	true;
 }
@@ -244,19 +245,6 @@ int		CMap::GetCurrentMapWidth() const
 
 const _mapTileAll*	CMap::GetCurrentMap() 
 {
-	if (m_selectedMap == MapType::big)
-	{
-		m_currentMap.currentMap = MapType::big;
-	}
-	else if (m_selectedMap == MapType::medium)
-	{
-		m_currentMap.currentMap = MapType::medium;
-	}
-	else if (m_selectedMap == MapType::small_)
-	{
-		m_currentMap.currentMap = MapType::small_;
-	}
-
 	return	&m_currentMap;
 }
 

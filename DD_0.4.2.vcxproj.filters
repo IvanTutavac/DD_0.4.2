@@ -198,6 +198,9 @@
     <ClInclude Include="src\Data\Defines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Logic\Entity\CPathFinding.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Data\Globals.cpp">
@@ -330,6 +333,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Logic\Entity\CPathFinding.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
