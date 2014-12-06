@@ -373,17 +373,8 @@ bool	DD::IO::LoadFileNames(std::vector<std::string>	&fileNames,const char * cons
 	return	true;
 }
 
-bool	DD::IO::LoadPassableFloor(std::vector<_texture> *texture, std::vector<_textureSFML> *textureSFML)
+bool	DD::IO::LoadPassableFloor(bool array_[])
 {
-	/*
-	file structure:
-	0 = p
-	1 = n
-	description:
-	0,1.... img name
-	p = passable, n = not passable
-	used for setting texture.passable
-	*/
 
 	SDL_RWops *f = LoadFile(FLOOR_PASSABLE_FILE_NAME);
 
@@ -393,48 +384,36 @@ bool	DD::IO::LoadPassableFloor(std::vector<_texture> *texture, std::vector<_text
 
 	char *context = nullptr;
 	char *word = DD_Strtok(line, "\r\n", &context);
-	std::string found = "";
 
 	int index = 0;
 
 	while (word != nullptr)
 	{
-		found = word;
+		if (index > IMG_FLOOR_FINISH)
+		{
+			Log("DD::IO::LoadPassableFloor(bool[]) failed, index larger than array size");
+			return	false;
+		}
 
 		if (DD::LineParse(word) == true)
 		{
 			if (std::char_traits<char>::compare("p", word, 1) == 0)
 			{
-				if (texture == nullptr) 
-					textureSFML->at(index).passable = true;
-				else
-					texture->at(index).passable = true;
+				array_[index] = false;
 			}
 			else if (std::char_traits<char>::compare("n", word, 1) == 0)
 			{
-				if (texture == nullptr)
-					textureSFML->at(index).passable = true;
-				else
-					texture->at(index).passable = true;
+				array_[index] = true;
 			}
 			else
 			{
-				char msg[64],value[16];
-				DD_Strcpy(msg, sizeof(msg), "Wrong value at");
-				DD_Itoa(index, value, sizeof(value), 10);
-				DD_Strcat(msg, sizeof(msg), value);
-				Log(msg);
-
+				Log("DD::IO::LoadPassableFloor(bool[]) failed, wrong value at: ", index);
 				return	false;
 			}
 		}
 		else
 		{
-			char msg[64], value[16];
-			DD_Strcpy(msg, sizeof(msg), "Line parsing ( no = sign) failed at ");
-			DD_Itoa(index, value, sizeof(value), 10);
-			DD_Strcat(msg, sizeof(msg), value);
-			Log(msg);
+			Log("DD::IO::LoadPassableFloor(bool[]) failed, Line parsing ( no = sign) failed at ", index);
 
 			return	false;
 		}

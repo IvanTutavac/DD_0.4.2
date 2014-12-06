@@ -250,7 +250,7 @@ bool	CGame::RenderInGame(int mouseX, int mouseY)
 		const int mapHeight = Map->GetCurrentMapHeight();
 
 		m_pRenderManager->GetRender()->VRenderGameMap(cameraX, cameraY);
-		m_pRenderManager->RenderVisibleEntities(EntityMng->GetEnemyMapPos(), TYPE_IMG_MON, cameraX, cameraY, mapWidth, mapHeight);
+		m_pRenderManager->RenderVisibleEntities(EntityMng->GetEnemyMapPosC(), TYPE_IMG_MON, cameraX, cameraY, mapWidth, mapHeight);
 		m_pRenderManager->RenderVisibleEntities(m_pLogic->GetSpellManager()->GetSpellMapPos(), TYPE_IMG_SPELL, cameraX, cameraY, mapWidth, mapHeight);
 		m_pRenderManager->RenderPlayer(playerX, playerY, cameraX, cameraY, mapWidth, mapHeight);
 		m_pRenderManager->RenderWeaponAttacks(EntityMng->GetCurrentWeaponAttacksForPlayer(), cameraX, cameraY, mapWidth, mapHeight);

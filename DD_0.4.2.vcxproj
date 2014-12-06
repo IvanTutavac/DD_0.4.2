@@ -90,6 +90,8 @@
     <ClInclude Include="src\Input\InputData.h" />
     <ClInclude Include="src\IO\IOFunctions.h" />
     <ClInclude Include="src\Logic\CLogic.h" />
+    <ClInclude Include="src\Logic\Entity\AIData.h" />
+    <ClInclude Include="src\Logic\Entity\CAI.h" />
     <ClInclude Include="src\Logic\Entity\CEntity.h" />
     <ClInclude Include="src\Logic\Entity\CEntityManager.h" />
     <ClInclude Include="src\Logic\Entity\CPathFinding.h" />
@@ -150,6 +152,7 @@
     <ClCompile Include="src\Input\CSFMLInput.cpp" />
     <ClCompile Include="src\IO\IOFunctions.cpp" />
     <ClCompile Include="src\Logic\CLogic.cpp" />
+    <ClCompile Include="src\Logic\Entity\CAI.cpp" />
     <ClCompile Include="src\Logic\Entity\CEntity.cpp" />
     <ClCompile Include="src\Logic\Entity\CEntityManager.cpp" />
     <ClCompile Include="src\Logic\Entity\CPathFinding.cpp" />

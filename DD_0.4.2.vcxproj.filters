@@ -201,6 +201,12 @@
     <ClInclude Include="src\Logic\Entity\CPathFinding.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Logic\Entity\CAI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Logic\Entity\AIData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Data\Globals.cpp">
@@ -336,6 +342,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Logic\Entity\CPathFinding.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Logic\Entity\CAI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

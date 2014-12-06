@@ -157,6 +157,36 @@ bool	CMovement::MoveEntity(_mapPos	&pos, double deltaTime, int mapWidth, int map
 	return	true;
 }
 
+void	CMovement::MoveEntity(_mapPos &pos, std::vector<std::pair<int, int>> &path, double deltaTime, float diff)
+{
+	float endY = static_cast<float>(path.back().first), endX = static_cast<float>(path.back().second);
+
+	if (endX != pos.endX || endY != pos.endY)
+	{
+		float x = endX - pos.x, y = endY - pos.y;
+
+		float d = sqrtf(x * x + y * y);
+
+		x /= d;
+		y /= d;
+
+		pos.movX = x;
+		pos.movY = y;
+		pos.endX = endX;
+		pos.endY = endY;
+	}
+
+	pos.x += static_cast<float>(pos.movX *deltaTime * 50); // zamijeniti 50 sa pos.speed
+	pos.y += static_cast<float>(pos.movY * deltaTime * 50);
+
+	float diffX{ pos.endX - pos.x }, diffY{ pos.endY - pos.y };
+
+	if (diffX > diff * -1 && diffX < diff && diffY > diff * -1 && diffY < diff)
+	{
+		path.pop_back();
+	}
+}
+
 void	CMovement::MoveWeaponAttacks(_weaponAttackPosWrapper *pos, double deltaTime, int mapWidth, int mapHeight, std::vector<int> &cleanIndex)
 {
 	int i{ 0 };

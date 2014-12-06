@@ -36,6 +36,8 @@ public:
 
 	bool	MoveEntity(_mapPos	&pos, double deltaTime, int mapWidth, int mapHeight, float diff = 1);
 
+	void	MoveEntity(_mapPos &pos, std::vector<std::pair<int, int>> &path, double deltaTime, float diff = 1);
+
 	// cleanIndex will be filled with indexes of the attacks which need to be cleaned
 	void	MoveWeaponAttacks(_weaponAttackPosWrapper *pos, double deltaTime, int mapWidth, int mapHeight, std::vector<int> &cleanIndex);
 };

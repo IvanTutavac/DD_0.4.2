@@ -25,10 +25,9 @@ namespace DD
 			std::map<std::string, _mappedLeftRight> &mappedLeftRight_, std::map<std::string, _mappedUpDown> &mappedUpDown_, std::map<std::string, KeyboardEvents> &eventsKey,
 			std::map<std::string, MouseEvents> &eventsMouse, std::map<std::string, LeftRight> &eventsLeftRight, std::map<std::string, UpDown> &eventsUpDown);
 	
-
-		// one needs to be passed as nullptr, the other one will have it's passable member updated
+		// an element will be updated with true if it's traversable and false if it's not
 		// returns false on error and writes to log
-		bool	LoadPassableFloor(std::vector<_texture> *texture, std::vector<_textureSFML> *textureSFML);
+		bool	LoadPassableFloor(bool array_[]);
 
 		bool	LoadCollisionRects(std::vector<_rect> &pRects, std::string datName);
 

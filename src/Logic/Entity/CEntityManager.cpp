@@ -1,5 +1,6 @@
 #include "CEntityManager.h"
 #include "EntityWrapper.h"
+#include "CAI.h"
 #include "CPlayer.h"
 #include "Item/CItemManager.h"
 #include "Item/CEquipped.h"
@@ -23,6 +24,7 @@ CEntityManager::CEntityManager()
 	m_pPlayer = nullptr;
 	m_pItemMng = nullptr;
 	m_pPlayerCurrentWeaponAttacks = nullptr;
+	m_pAI = nullptr;
 }
 
 CEntityManager::~CEntityManager()
@@ -30,13 +32,13 @@ CEntityManager::~CEntityManager()
 
 }
 
-bool	CEntityManager::Init()
+bool	CEntityManager::Init(const _mapTileAll *map, bool floorPassable[])
 {
 	m_pEnemyList = DD_NEW _enemyWrapper{};
 	m_pEnemy = DD_NEW _entityWrapper{};
 	m_pPlayer = DD_NEW CPlayer{};
 	m_pItemMng = DD_NEW CItemManager{};
-
+	m_pAI = DD_NEW CAI{ map, m_pEnemy, floorPassable };
 
 	if (!InitEnemyIndex())
 	{
@@ -65,6 +67,12 @@ bool	CEntityManager::Init()
 	if (!m_pPlayer->Init(50, 200, 100))
 	{
 		Log("CEntityManager::Init() failed, Player Init failed");
+		return	false;
+	}
+
+	if (!m_pAI->Init())
+	{
+		Log("CEntityManager::Init() failed, CAI::Init caused the fail");
 		return	false;
 	}
 
@@ -103,6 +111,8 @@ void	CEntityManager::Clean()
 		m_pPlayer->Clean();
 	if (m_pItemMng != nullptr)
 		m_pItemMng->Clean();
+	if (m_pAI != nullptr)
+		m_pAI->Clean();
 
 	DD_DELETE(m_pEnemy);
 	DD_DELETE(m_pEnemyList);
@@ -154,6 +164,17 @@ void	CEntityManager::Update(double deltaTime)
 		m_inGameHoverDataTime -= deltaTime;
 }
 
+bool	CEntityManager::UpdateAI(int playerX, int playerY)
+{
+	if (!m_pAI->UpdateAI(playerX, playerY))
+	{
+		Log("CEntityManager::UpdateAI(int,int) failed, CAI::UpdateAI(int,int) caused the fail");
+		return	false;
+	}
+
+	return	true;
+}
+
 void	CEntityManager::CreateEnemies(const std::vector<_mapPos> *enemies)
 {
 	for (const auto& enemy : *enemies)
@@ -167,12 +188,18 @@ void	CEntityManager::CreateEnemies(const std::vector<_mapPos> *enemies)
 
 		m_pEnemy->pos.back().id = m_pEnemy->entity.back().GetId(); // overwrite the old id
 
+		m_pAI->AddEnemy();
 	}
 }
 
-const std::vector<_mapPos>*	CEntityManager::GetEnemyMapPos() const
+const std::vector<_mapPos>*	CEntityManager::GetEnemyMapPosC() const
 {
 	return	&m_pEnemy->pos;
+}
+
+std::vector<_mapPos>&	CEntityManager::GetEnemyMapPos()
+{
+	return	m_pEnemy->pos;
 }
 
 CEntity*	CEntityManager::GetEnemy(int index)
@@ -194,6 +221,12 @@ bool	CEntityManager::DeleteEnemy(const int index)
 	if (m_pInGameHoverData->inGameHoverIndex == index) // the entity who died is being hovered over, reset the data
 	{
 		EmptyHoverData();
+	}
+
+	if (!m_pAI->DeleteEnemy(index))
+	{
+		Log("CEntityManager::DeleteEnemy() failed, CAI::DeleteEnemy(int) caused the fail");
+		return	false;
 	}
 
 	m_pEnemy->entity[index].Clean();
@@ -543,6 +576,11 @@ CItemManager*	CEntityManager::GetItemManager()
 CPlayer*	CEntityManager::GetPlayer()
 {
 	return	m_pPlayer;
+}
+
+CAI*		CEntityManager::GetAI()
+{
+	return	m_pAI;
 }
 
 _weaponAttackPosWrapper*	CEntityManager::GetCurrentWeaponAttacksForPlayer()

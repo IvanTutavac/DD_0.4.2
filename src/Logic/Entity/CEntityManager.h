@@ -6,12 +6,14 @@
 
 class CEntity;
 class CPlayer;
+class CAI;
 class CItemManager;
 class CSpellManager;
 
 struct _entityWrapper;
 struct _enemyWrapper;
 struct _mapPos;
+struct _mapTileAll;
 struct _weaponAttackPosWrapper;
 struct _leftRight;
 struct _upDown;
@@ -30,6 +32,7 @@ private:
 
 	_enemyWrapper	*m_pEnemyList; // contains every enemy available
 	_entityWrapper	*m_pEnemy; // enemies alive on map
+	CAI				*m_pAI;
 
 	CItemManager	*m_pItemMng;
 	CPlayer			*m_pPlayer;	
@@ -62,14 +65,17 @@ public:
 	CEntityManager();
 	~CEntityManager();
 
-	bool	Init();
+	bool	Init(const _mapTileAll *map, bool floorPassable[]);
 	void	Clean();
 
 	void	Update(double deltaTime);
 
+	bool	UpdateAI(int playerX, int playerY);
+
 	void	CreateEnemies(const std::vector<_mapPos> *enemies);
 
-	const std::vector<_mapPos>*	GetEnemyMapPos() const;
+	const std::vector<_mapPos>*	GetEnemyMapPosC() const;
+	std::vector<_mapPos>&	GetEnemyMapPos();
 
 	CEntity* GetEnemy(int index);
 
@@ -86,6 +92,7 @@ public:
 
 	CItemManager*	GetItemManager();
 	CPlayer*		GetPlayer();
+	CAI*			GetAI();
 	_weaponAttackPosWrapper*	GetCurrentWeaponAttacksForPlayer();
 	const _inGameHoverData*	GetInGameHoverData() const;
 };

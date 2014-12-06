@@ -9,8 +9,6 @@
 #include "../Tools/Log.h"
 #include "../Tools/StringWrapper.h"
 #include "../Tools/debug.h"
-#include "../IO/IOFunctions.h"
-
 
 CSDLRender::CSDLRender()
 {
@@ -756,14 +754,6 @@ bool	CSDLRender::LoadImages()
 	}
 
 	m_pButtonRect = SDL_CreateTextureFromSurface(m_pRenderer, tmpButtonRect);
-
-	bool load = DD::IO::LoadPassableFloor(&m_vImage[0].m_vTexture, nullptr);
-
-	if (load == false)
-	{
-		Log("CSDLRender::LoadImages() failed, floor img passable setup failed");
-		return	false;
-	}
 
 	m_pHUDImg = SDL_CreateTexture(m_pRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, g_windowWidth, g_windowHUDHeight);
 

@@ -11,6 +11,7 @@
 #include "Entity/CEntity.h"
 #include "Entity/CPlayer.h"
 #include "Entity/CEntityManager.h"
+#include "Entity/CAI.h"
 #include "Entity/Item/CWeaponAttack.h"
 #include "GUI/CGUI.h"
 #include "GUI/CWindow.h"
@@ -18,6 +19,7 @@
 #include "GUI/CSelectBox.h"
 #include "GUI/CGUIAction.h"
 #include "GUI/EnumGui.h"
+#include "../IO/IOFunctions.h"
 #include "../Tools/MessageBox.h"
 #include "../Tools/debug.h"
 #include "../Tools/Log.h"
@@ -56,12 +58,6 @@ bool	CLogic::Init(const RenderAPI &api)
 	m_pSpellManager = DD_NEW CSpellManager{};
 	m_pCollision = DD_NEW CCollision{};
 
-	if (m_pEntityManager->Init() == false)
-	{
-		Log("Clogic::Init failed, Entity Manager Init failed");
-		return	false;
-	}
-
 	if (m_pMap->Init() == false)
 	{
 		Log("CLogic::Init failed, Map Init failed");
@@ -71,6 +67,18 @@ bool	CLogic::Init(const RenderAPI &api)
 	if (m_pMapEditor->Init() == false)
 	{
 		Log("CLogic::Init failed, MapEditor Init failed");
+		return	false;
+	}
+
+	if (!DD::IO::LoadPassableFloor(m_floorPassable))
+	{
+		Log("CLogic::Init() failed, DD::IO::LoadPassableFloor caused the fail");
+		return	false;
+	}
+
+	if (m_pEntityManager->Init(m_pMap->GetCurrentMap(), m_floorPassable) == false)
+	{
+		Log("Clogic::Init failed, Entity Manager Init failed");
 		return	false;
 	}
 
@@ -154,6 +162,8 @@ bool	CLogic::UpdateLogic(const double deltaTime, CMessage *message)
 
 	UpdateTime();
 
+	AI();
+
 	Movement(message);
 
 	if (!Collision())
@@ -180,6 +190,20 @@ void	CLogic::UpdateTime()
 
 	if (m_textInputTime > 0)
 		m_textInputTime -= m_deltaTime;
+}
+
+bool	CLogic::AI()
+{
+	if (!m_pState->IsGameStateInGame())
+		return	true;
+
+	if (!m_pEntityManager->UpdateAI(static_cast<int>(m_pMap->GetPlayerX()), static_cast<int>(m_pMap->GetPlayerY())))
+	{
+		Log("CLogic::AI() failed, CEntityManager::UpdateAI(int,int) caused the fail");
+		return	false;
+	}
+
+	return	true;
 }
 
 bool	CLogic::ProcessPlayerInput(CMessage *message)
@@ -380,7 +404,7 @@ bool	CLogic::ReadGUIAction(CMessage *message, CGUIAction *guiAction)
 				return	false;
 
 			m_pMap->SetPlayerX(64.f);
-			m_pMap->SetPlayerY(64.f);
+			m_pMap->SetPlayerY(66.f);
 
 			m_pEntityManager->CreateEnemies(m_pMap->GetEnemyMapPos());
 
@@ -637,6 +661,15 @@ void	CLogic::Movement(CMessage *message)
 		{
 			m_playerMovementByMouse = m_pMovement->MoveEntity(m_pMap->GetPlayerMapPos(), m_deltaTime, mapWidth, mapHeight);
 		}
+		
+		std::vector<_mapPos> &enemyMapPos =  m_pEntityManager->GetEnemyMapPos();
+		std::vector<_aiData> &enemyAIData = m_pEntityManager->GetAI()->GetAIData();
+
+		for (size_t i = 0; i < enemyMapPos.size(); ++i)
+		{
+			if (!enemyAIData[i].path.empty())
+				m_pMovement->MoveEntity(enemyMapPos[i], enemyAIData[i].path, m_deltaTime);
+		}
 
 		std::vector<int> cleanUpSpells{};
 		
@@ -675,7 +708,7 @@ bool	CLogic::Collision()
 
 	std::vector<std::pair<int, int>>	collidedSpells;
 
-	m_pCollision->CheckEntityCollision(m_pSpellManager->GetSpellMapPos(), m_pEntityManager->GetEnemyMapPos(), collidedSpells, CollisionType::SpellEnemy);
+	m_pCollision->CheckEntityCollision(m_pSpellManager->GetSpellMapPos(), m_pEntityManager->GetEnemyMapPosC(), collidedSpells, CollisionType::SpellEnemy);
 
 	if (collidedSpells.size() > 0)
 		if (!SpellCollision(collidedSpells))
@@ -683,7 +716,7 @@ bool	CLogic::Collision()
 
 	std::vector<std::pair<int, int>>	collidedWeaponAttacks;
 
-	m_pCollision->CheckWeaponAttackCollision(m_pEntityManager->GetCurrentWeaponAttacksForPlayer(), m_pEntityManager->GetEnemyMapPos(), collidedWeaponAttacks);
+	m_pCollision->CheckWeaponAttackCollision(m_pEntityManager->GetCurrentWeaponAttacksForPlayer(), m_pEntityManager->GetEnemyMapPosC(), collidedWeaponAttacks);
 
 	if (collidedWeaponAttacks.size() > 0)
 		WeaponCollisionOnEnemy(collidedWeaponAttacks);

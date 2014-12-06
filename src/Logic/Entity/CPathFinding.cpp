@@ -9,9 +9,9 @@ PathFinding::CPathFinding::CPathFinding(const _mapTileAll *map) : m_pInGameMap(m
 
 void	PathFinding::CPathFinding::Clear()
 {
-	for (int i = 0; i < MAP_HEIGHT_BIG; ++i)
+	for (int i = 0; i < MAP_HEIGHT_BIG / 32; ++i)
 	{
-		for (int j = 0; j < MAP_WIDTH_BIG; ++j)
+		for (int j = 0; j < MAP_WIDTH_BIG / 32; ++j)
 		{
 			m_map[i][j].i = i, m_map[i][j].j = j;
 			m_map[i][j].g = 10;
@@ -20,6 +20,45 @@ void	PathFinding::CPathFinding::Clear()
 			m_map[i][j].parent = 0;
 			m_map[i][j].type = NodeType::map;
 		}
+	}
+
+	m_closedListIndex = 0;
+	m_openListIndex = 0;
+}
+
+void	PathFinding::CPathFinding::Clear(int startI, int startJ, int searchWidth, int searchHeight)
+{
+	int	i = startI - searchHeight, j = startJ - searchWidth;
+
+	if (i < 0)
+		i = 0;
+
+	if (j < 0)
+		j = 0;
+
+	int	finishI = startI + searchHeight, finishJ = startJ + searchWidth;
+
+	if (finishI >= m_mapHeight)
+		finishI = m_mapHeight - 1;
+
+	if (finishJ >= m_mapWidth)
+		finishJ = m_mapWidth - 1;
+
+	int k = j;
+
+	for (; i <= finishI; ++i)
+	{
+		for (; j <= finishJ; ++j)
+		{
+			m_map[i][j].i = i, m_map[i][j].j = j;
+			m_map[i][j].g = 10;
+			m_map[i][j].h = 0;
+			m_map[i][j].f = 0;
+			m_map[i][j].parent = 0;
+			m_map[i][j].type = NodeType::map;
+		}
+
+		j = k;
 	}
 
 	m_closedListIndex = 0;
@@ -38,9 +77,7 @@ bool	PathFinding::CPathFinding::FindPath(int startI, int startJ, int searchWidth
 
 bool	PathFinding::CPathFinding::RunAStar(int startI, int startJ, int searchWidth, int searchHeight, int goalI, int goalJ)
 {
-	int	mapWidth{}, mapHeight{};
-
-	if (!UpdateMapWidthHeight(mapWidth, mapHeight))
+	if (!UpdateMapWidthHeight())
 		return	false;
 
 	int	searchI{ startI }, searchJ{ startJ };
@@ -100,7 +137,7 @@ bool	PathFinding::CPathFinding::RunAStar(int startI, int startJ, int searchWidth
 				{
 					int posI{ i + searchI }, posJ{ j + searchJ };
 
-					if (posI >= 0 && posJ >= 0 && posI >= startI - searchHeight && posI < mapHeight && posI <= startI + searchHeight && posJ >= startJ - searchWidth && posJ < mapWidth && posJ <= startJ + searchWidth && m_map[posI][posJ].type != NodeType::wall && IsValidDiagonalMove(i, j, searchJ, searchI))
+					if (posI >= 0 && posJ >= 0 && posI >= startI - searchHeight && posI < m_mapHeight && posI <= startI + searchHeight && posJ >= startJ - searchWidth && posJ < m_mapWidth && posJ <= startJ + searchWidth && m_map[posI][posJ].type != NodeType::wall && IsValidDiagonalMove(i, j, searchJ, searchI))
 					{
 						if (m_map[posI][posJ].type == NodeType::map)
 						{
@@ -168,9 +205,7 @@ bool	PathFinding::CPathFinding::RunAStar(int startI, int startJ, int searchWidth
 
 bool	PathFinding::CPathFinding::RunDijkstra(int startI, int startJ, int searchWidth, int searchHeight, int goalI, int goalJ)
 {
-	int	mapWidth{}, mapHeight{};
-
-	if (!UpdateMapWidthHeight(mapWidth, mapHeight))
+	if (!UpdateMapWidthHeight())
 		return	false;
 
 	int	searchI{ startI }, searchJ{ startJ };
@@ -230,7 +265,7 @@ bool	PathFinding::CPathFinding::RunDijkstra(int startI, int startJ, int searchWi
 				{
 					int posI{ i + searchI }, posJ{ j + searchJ };
 
-					if (posI >= 0 && posJ >= 0 && posI >= startI - searchHeight && posI < mapHeight && posI <= startI + searchHeight && posJ >= startJ - searchWidth && posJ < mapWidth && posJ <= startJ + searchWidth && IsValidDiagonalMove(i, j, searchJ, searchI))
+					if (posI >= 0 && posJ >= 0 && posI >= startI - searchHeight && posI < m_mapHeight && posI <= startI + searchHeight && posJ >= startJ - searchWidth && posJ < m_mapWidth && posJ <= startJ + searchWidth && IsValidDiagonalMove(i, j, searchJ, searchI))
 					{
 						if (m_map[posI][posJ].type == NodeType::map)
 						{
@@ -264,17 +299,23 @@ bool	PathFinding::CPathFinding::RunDijkstra(int startI, int startJ, int searchWi
 
 	while (!pathExtracted)
 	{
-		m_path.emplace_back(std::pair < int, int > {m_closedList[pathIndex].i, m_closedList[pathIndex].j});
+		m_path.emplace_back(std::pair < int, int > {m_closedList[pathIndex].i * 32, m_closedList[pathIndex].j * 32});
 
 		pathIndex = m_closedList[pathIndex].parent;
 
 		if (m_closedList[pathIndex].i == startI && m_closedList[pathIndex].j == startJ)
 		{
+//			m_path.emplace_back(std::pair < int, int > {m_closedList[pathIndex].i, m_closedList[pathIndex].j});
 			pathExtracted = true;
 		}
 	}
 
 	return	true;
+}
+
+void	PathFinding::CPathFinding::GetPath(std::vector<std::pair<int, int>> &path)
+{
+	path = std::move(m_path);
 }
 
 int	PathFinding::CPathFinding::CalcH(int i, int j, int goalI, int goalJ)
@@ -326,24 +367,24 @@ bool	PathFinding::CPathFinding::IsValidDiagonalMove(int i, int j, int posX, int 
 	return	true;
 }
 
-bool	PathFinding::CPathFinding::UpdateMapWidthHeight(int &mapWidth, int &mapHeight)
+bool	PathFinding::CPathFinding::UpdateMapWidthHeight()
 {
 	MapType	type{ *m_pInGameMap->currentMap };
 
 	if (type == MapType::small_)
 	{
-		mapWidth = MAP_WIDTH_SMALL;
-		mapHeight = MAP_HEIGHT_SMALL;
+		m_mapWidth = MAP_WIDTH_SMALL / 32;
+		m_mapHeight = MAP_HEIGHT_SMALL / 32;
 	}
 	else if (type == MapType::medium)
 	{
-		mapWidth = MAP_WIDTH_MEDIUM;
-		mapHeight = MAP_HEIGHT_MEDIUM;
+		m_mapWidth = MAP_WIDTH_MEDIUM / 32;
+		m_mapHeight = MAP_HEIGHT_MEDIUM / 32;
 	}
 	else if (type == MapType::big)
 	{
-		mapWidth = MAP_WIDTH_BIG;
-		mapHeight = MAP_HEIGHT_BIG;
+		m_mapWidth = MAP_WIDTH_BIG / 32;
+		m_mapHeight = MAP_HEIGHT_BIG / 32;
 	}
 	else
 		return	false;

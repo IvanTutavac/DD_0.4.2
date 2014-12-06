@@ -12,7 +12,6 @@ const int LogTexture = 1;
 struct _texture
 {
 	int w, h;
-	bool	passable;
 	SDL_Texture *texture;
 };
 

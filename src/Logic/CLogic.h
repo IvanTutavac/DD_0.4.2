@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../Data/Const.h"
+
 #include <vector>
 
 class CPlayer;
@@ -41,16 +43,20 @@ private:
 
 	double	m_deltaTime; // Set each frame by UpdateLogic
 
+	double  m_textInputTime; // if its <= 0 process the text input
+	const double m_textInputTimeReset = 0.12;
+
 	bool	m_waitingForAttackDirection; // button for attacking is being pressed, direction key press will result into an attack, not movement
 
 	bool	m_playerMovementByMouse;
 
-	double  m_textInputTime; // if its <= 0 process the text input
-	const double m_textInputTimeReset = 0.12;
+	bool	m_floorPassable[IMG_FLOOR_FINISH + 1];
 
 private:
 
 	void	UpdateTime();
+
+	bool	AI();
 
 	void	Movement(CMessage *message);
 

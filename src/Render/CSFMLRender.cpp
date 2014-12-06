@@ -7,7 +7,6 @@
 #include "../Tools/debug.h"
 #include "../Tools/StringWrapper.h"
 #include "../Tools/Log.h"
-#include "../IO/IOFunctions.h"
 #include <SFML/Graphics.hpp>
 
 CSFMLRender::CSFMLRender()
@@ -683,12 +682,6 @@ bool	CSFMLRender::LoadImages()
 	m_pHUDSprite = DD_NEW sf::Sprite{ m_pHUDTexture->getTexture() };
 
 	m_pHUDSprite->setPosition(sf::Vector2f{ 0.f, static_cast<float>(g_windowHeight) });
-
-	if (!DD::IO::LoadPassableFloor(nullptr, &m_vImage[0].m_vTexture))
-	{
-		Log("CSFMLRender::LoadImages() failed, DD::IO::LoadPassableFloor returned false");
-		return	false;
-	}
 
 	return	true;
 }

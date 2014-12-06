@@ -11,7 +11,6 @@ namespace sf
 struct _textureSFML
 {
 	int	w,  h;
-	bool	passable;
 	sf::Texture	*texture;
 	sf::Sprite	*sprite;
 };
