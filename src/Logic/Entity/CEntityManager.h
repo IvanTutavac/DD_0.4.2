@@ -49,7 +49,10 @@ private:
 	bool	InitEnemyList();
 	bool	InitEnemyNames();
 
+	// returns nullptr if there's no enemy with such id
 	CEntity*	GetEnemyById(const int id);
+	// if there's no entity with such id, index will be set to -1 and the function will return nullptr
+	CEntity*	GetEnemyById(int id, int &index);
 
 	// returns false on error and writes to log
 	bool	DeleteEnemy(const int index);
@@ -82,11 +85,14 @@ public:
 	// returns false on error and writes to log
 	bool	EnemyDied(const int index);
 
+	void	ProcessEnemyAttack(std::vector<int> &enemyIndex, int playerX, int playerY);
 	void	ProcessPlayerAttack(const KeyboardEvents &key, const _leftRight &lR, const _upDown &uD, float posX, float posY);
-	void	PlayerAttackHit(const int attackIndex, const int enemyIndex);
-	void	DeleteCurrentWeaponAttack(const int index);
+	void	PlayerAttackHit(const int attackIndex, const int enemyID);
+	void	EnemyAttackHit(int attackIndex);
 	// attackHasExpired -> pass true after the weapon attack time has expired, otherwise false
 	void	DeleteCurrentPlayerWeaponAttack(int	index, bool attackHasExpired = false);
+	// attackHasExpired -> pass true after the weapon attack time has expired, otherwise false
+	void	DeleteCurrentEnemyWeaponAttack(int attackIndex, bool attackHasExpired = false);
 
 	void	UpdateInGameHoverData(int mouseX1, int mouseY1, int cameraX, int cameraY, const CSpellManager *SpellMng);
 
@@ -94,5 +100,6 @@ public:
 	CPlayer*		GetPlayer();
 	CAI*			GetAI();
 	_weaponAttackPosWrapper*	GetCurrentWeaponAttacksForPlayer();
+	_weaponAttackPosWrapper*	GetCurrentWeaponAttacksForEnemy();
 	const _inGameHoverData*	GetInGameHoverData() const;
 };

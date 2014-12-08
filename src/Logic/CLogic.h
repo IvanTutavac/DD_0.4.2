@@ -65,6 +65,7 @@ private:
 	bool	Collision();
 	bool	SpellCollision(std::vector<std::pair<int, int>> &collided);
 	void	WeaponCollisionOnEnemy(std::vector<std::pair<int, int>> &collided);
+	void	WeaponCollisionOnPlayer(std::vector<std::pair<int, int>> &collided);
 
 	bool	ProcessGUIInput(CMessage *message);
 

@@ -61,6 +61,7 @@ public:
 	void	SetPlayerY(float value);
 
 	_mapPos&	GetPlayerMapPos();
+	const _mapPos&	GetPlayerMapPosC() const;
 
 	// returns 0 if something went wrong
 	virtual int		GetCurrentMapWidth() const;

@@ -404,7 +404,7 @@ bool	CLogic::ReadGUIAction(CMessage *message, CGUIAction *guiAction)
 				return	false;
 
 			m_pMap->SetPlayerX(64.f);
-			m_pMap->SetPlayerY(66.f);
+			m_pMap->SetPlayerY(64.f);
 
 			m_pEntityManager->CreateEnemies(m_pMap->GetEnemyMapPos());
 
@@ -683,6 +683,13 @@ void	CLogic::Movement(CMessage *message)
 	
 		for (const auto& index : cleanUpWeaponAttacks)
 			m_pEntityManager->DeleteCurrentPlayerWeaponAttack(index, true);
+
+		cleanUpWeaponAttacks.clear();
+
+		m_pMovement->MoveWeaponAttacks(m_pEntityManager->GetCurrentWeaponAttacksForEnemy(), m_deltaTime, mapWidth, mapHeight, cleanUpWeaponAttacks);
+
+		for (const auto& index : cleanUpWeaponAttacks)
+			m_pEntityManager->DeleteCurrentEnemyWeaponAttack(index, true);
 	}
 	else if (m_pState->IsGameStateMapEditor())
 	{
@@ -710,16 +717,26 @@ bool	CLogic::Collision()
 
 	m_pCollision->CheckEntityCollision(m_pSpellManager->GetSpellMapPos(), m_pEntityManager->GetEnemyMapPosC(), collidedSpells, CollisionType::SpellEnemy);
 
-	if (collidedSpells.size() > 0)
+	if (!collidedSpells.empty())
 		if (!SpellCollision(collidedSpells))
 			return	false;
 
 	std::vector<std::pair<int, int>>	collidedWeaponAttacks;
 
-	m_pCollision->CheckWeaponAttackCollision(m_pEntityManager->GetCurrentWeaponAttacksForPlayer(), m_pEntityManager->GetEnemyMapPosC(), collidedWeaponAttacks);
+	m_pCollision->CheckWeaponAttackCollision(m_pEntityManager->GetCurrentWeaponAttacksForPlayer(), m_pEntityManager->GetEnemyMapPosC(), collidedWeaponAttacks, WeaponAttCollType::PlayerAttOnEnemy);
 
-	if (collidedWeaponAttacks.size() > 0)
+	if (!collidedWeaponAttacks.empty())
+	{
 		WeaponCollisionOnEnemy(collidedWeaponAttacks);
+		collidedWeaponAttacks.clear();
+	}
+
+	m_pCollision->CheckWeaponAttackCollision(m_pEntityManager->GetCurrentWeaponAttacksForEnemy(), &std::vector < _mapPos > { m_pMap->GetPlayerMapPosC()}, collidedWeaponAttacks, WeaponAttCollType::EnemyAttOnPlayer);
+
+	if (!collidedWeaponAttacks.empty())
+	{
+		WeaponCollisionOnPlayer(collidedWeaponAttacks);
+	}
 
 	return	true;
 }
@@ -762,14 +779,30 @@ bool	CLogic::SpellCollision(std::vector<std::pair<int, int>> &collided)
 
 void	CLogic::WeaponCollisionOnEnemy(std::vector<std::pair<int, int>> &collided)
 {
-	for (auto& index : collided)
+	// collided.first = attack index
+	// collided.second = enemy ID
+
+	for (auto& e : collided)
 	{
-		m_pEntityManager->PlayerAttackHit(index.first, index.second);
+		m_pEntityManager->PlayerAttackHit(e.first, e.second);
 	}
 
-	for (auto& index : collided)
+	for (auto& e : collided)
 	{
-		m_pEntityManager->DeleteCurrentPlayerWeaponAttack(index.first);
+		m_pEntityManager->DeleteCurrentPlayerWeaponAttack(e.first);
+	}
+}
+
+void	CLogic::WeaponCollisionOnPlayer(std::vector<std::pair<int, int>> &collided)
+{
+	for (auto& e : collided)
+	{
+		m_pEntityManager->EnemyAttackHit(e.first);
+	}
+
+	for (auto& e : collided)
+	{
+		m_pEntityManager->DeleteCurrentEnemyWeaponAttack(e.first);
 	}
 }
 

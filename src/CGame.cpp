@@ -254,6 +254,7 @@ bool	CGame::RenderInGame(int mouseX, int mouseY)
 		m_pRenderManager->RenderVisibleEntities(m_pLogic->GetSpellManager()->GetSpellMapPos(), TYPE_IMG_SPELL, cameraX, cameraY, mapWidth, mapHeight);
 		m_pRenderManager->RenderPlayer(playerX, playerY, cameraX, cameraY, mapWidth, mapHeight);
 		m_pRenderManager->RenderWeaponAttacks(EntityMng->GetCurrentWeaponAttacksForPlayer(), cameraX, cameraY, mapWidth, mapHeight);
+		m_pRenderManager->RenderWeaponAttacks(EntityMng->GetCurrentWeaponAttacksForEnemy(), cameraX, cameraY, mapWidth, mapHeight);
 	}
 
 	m_pRenderManager->CreateInGameHUD(mouseX, mouseY, static_cast<int>(m_seconds), EntityMng->GetPlayer(), EntityMng->GetInGameHoverData());

@@ -76,6 +76,9 @@ namespace PathFinding
 
 		// valid once per FindPath()
 		void	GetPath(std::vector<std::pair<int, int>> &path);
+
+		void	AddWalls(const std::vector<std::pair<int, int>> &walls);
+		void	RemoveWalls(const std::vector<std::pair<int, int>> &walls);
 	};
 }
 

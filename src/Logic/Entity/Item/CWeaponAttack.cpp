@@ -15,7 +15,7 @@ WeaponAttackType CWeaponAttack::GetMappedAttack(KeyboardEvents key)
 {
 	for (const auto& attack : m_attack)
 	{
-		if (attack.key == key && !m_attackStarted)
+		if (attack.key == key)
 			return	attack.attackType;
 	}
 
@@ -112,7 +112,7 @@ bool	CWeaponAttack::IsAttackAvailable(WeaponAttackType type) const
 {
 	for (const auto& attack : m_attack)
 	{
-		if (attack.attackType == type)
+		if (attack.attackType == type && !m_attackStarted)
 		{
 			if (attack.cooldown <= 0)
 				return	true;

@@ -45,6 +45,8 @@ bool	CAI::DeleteEnemy(int index)
 	}
 
 	m_aiData.erase(m_aiData.begin() + index);
+
+	ClearAttPos(index);
 	
 	return	true;
 }
@@ -71,25 +73,35 @@ bool	CAI::UpdateAI(int playerX, int playerY)
 
 	int entityIndex = 0, endI, endJ;
 
+	if (CheckDistance(playerX, playerY, static_cast<int>(m_pEnemy->pos[entityIndex].x), static_cast<int>(m_pEnemy->pos[entityIndex].y), 45))
+	{
+		if (m_aiData[entityIndex].path.empty()) // entity not moving (meaning, movement disabled or goal reached) 
+			m_entitiesReadyForAttack.emplace_back(entityIndex);
+		
+		return true;
+	}
+
 	if (m_aiData[entityIndex].playerX == playerX && m_aiData[entityIndex].playerY == playerY) // player has not moved, no need to find a new path
 	{
 		return	true;
-	}
-
-	if (CheckDistance(playerX, playerY, static_cast<int>(m_pEnemy->pos[entityIndex].x), static_cast<int>(m_pEnemy->pos[entityIndex].y), 45))
-	{
-		ClearAttPos(entityIndex);
-		return true;
 	}
 
 	CalcPlayerMapPos(playerX, playerY);
 
 	CalcMeleeAttPosOnPlayer(playerX, playerY);
 
+	if (m_aiData[entityIndex].movementDisabled)
+	{
+		m_aiData[entityIndex].path.clear();
+		return	true;
+	}
+
 	if (GetFreeMeleeAttPosOnPlayer(entityIndex, endI, endJ))
 	{
 		int startI = static_cast<int>(m_pEnemy->pos[entityIndex].y / 32), startJ = static_cast<int>(m_pEnemy->pos[entityIndex].x / 32);
 		int searchWidth{ 30 }, searchHeight{ 30 };
+
+		m_pPathFinding->AddWalls(m_playerMapPos);
 		
 		if (m_pPathFinding->FindPath(startI, startJ,searchWidth, searchHeight, endI, endJ, PathFinding::AlgType::Dijkstra))
 		{
@@ -100,7 +112,10 @@ bool	CAI::UpdateAI(int playerX, int playerY)
 			UpdateMeleeAttEndPath(entityIndex, m_aiData[entityIndex].path[0], playerX, playerY);
 
 			m_aiData[entityIndex].playerX = playerX, m_aiData[entityIndex].playerY = playerY;
+			m_aiData[entityIndex].state = AIEntityState::moving;
 		}
+
+		m_pPathFinding->RemoveWalls(m_playerMapPos);
 
 		m_pPathFinding->Clear(startI, startJ, searchWidth, searchHeight);		
 	}
@@ -232,8 +247,12 @@ void	CAI::CalcMeleeAttPosOnPlayer(int i, int j, _attPos &pos)
 	{
 		pos.i = i;
 		pos.j = j;
-		pos.id = -1;
-		pos.blocked = false;
+
+		if (pos.blocked) // position now traversable
+		{
+			pos.id = -1;
+			pos.blocked = false;
+		}
 	}
 	else
 	{
@@ -270,7 +289,7 @@ bool	CAI::AlreadyHasMeleeAttPosOnPlayer(int entityID, int &i, int &j, _attPos &p
 {
 	if (pos.id == entityID)
 	{
-		i = pos.i, pos.j;
+		i = pos.i, j = pos.j;
 		
 		return	true;
 	}
@@ -338,4 +357,9 @@ void	CAI::ClearAttPos(int entityIndex)
 std::vector<_aiData>&	CAI::GetAIData()
 {
 	return	m_aiData;
+}
+
+std::vector<int>&	CAI::GetEntitiesReadyForAttack()
+{
+	return	m_entitiesReadyForAttack;
 }

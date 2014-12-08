@@ -35,6 +35,12 @@ bool	CCollision::Init()
 		return	false;
 	}
 
+	if (!DD::IO::LoadCollisionRects(m_playerRects, "player.txt"))
+	{
+		Log("CCollision Init failed, DD::IO::LoadCollisionRects for player failed");
+		return	false;
+	}
+
 	return	true;
 }
 
@@ -69,8 +75,19 @@ void	CCollision::CheckEntityCollision(const std::vector<_mapPos> *entity1, const
 	}
 }
 
-void	CCollision::CheckWeaponAttackCollision(_weaponAttackPosWrapper *weaponAttack, const std::vector<_mapPos> *entity, std::vector<std::pair<int, int>> &collided)
+void	CCollision::CheckWeaponAttackCollision(_weaponAttackPosWrapper *weaponAttack, const std::vector<_mapPos> *entity, std::vector<std::pair<int, int>> &collided, WeaponAttCollType type)
 {
+	std::vector<_rect>	*pRect = nullptr;
+
+	if (type == WeaponAttCollType::EnemyAttOnPlayer)
+	{
+		pRect = &m_playerRects;
+	}
+	else if (type == WeaponAttCollType::PlayerAttOnEnemy)
+	{
+		pRect = &m_enemyRects;
+	}
+
 	int i{ 0 }, j{ 0 };
 
 	for (auto& attack : weaponAttack->pos)
@@ -85,9 +102,9 @@ void	CCollision::CheckWeaponAttackCollision(_weaponAttackPosWrapper *weaponAttac
 			{
 				if (!attack.IsAlreadyCollided(e.id) && tX2 >= e.x && tX <= e.x + 32 && tY2 >= e.y && tY <= e.y + 32) // weak check
 				{
-					if (WeaponEntityCollisionCheck(attack, e, m_enemyRects)) // detailed check, will check weapon and enemy rects for collision
+					if (WeaponEntityCollisionCheck(attack, e, *pRect)) // detailed check, will check weapon and enemy rects for collision
 					{
-						std::pair<int, int> found{ i, j };
+						std::pair<int, int> found{ i, e.id };//j };
 
 						collided.push_back(found);
 
@@ -95,7 +112,7 @@ void	CCollision::CheckWeaponAttackCollision(_weaponAttackPosWrapper *weaponAttac
 					}
 				}
 
-				j++;
+				//j++;
 			}
 		}
 

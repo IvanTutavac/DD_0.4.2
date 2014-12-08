@@ -9,6 +9,7 @@
 #include "Item/ItemEnums.h"
 #include "../Spell/CSpellManager.h"
 #include "../Spell/CSpell.h"
+#include "../Map/MapData.h"
 #include "../Physics/CollisionFunctions.h"
 #include "../../Data/Enums.h"
 #include "../../Data/Globals.h"
@@ -24,6 +25,7 @@ CEntityManager::CEntityManager()
 	m_pPlayer = nullptr;
 	m_pItemMng = nullptr;
 	m_pPlayerCurrentWeaponAttacks = nullptr;
+	m_pEnemyCurrentWeaponAttacks = nullptr;
 	m_pAI = nullptr;
 }
 
@@ -80,6 +82,7 @@ bool	CEntityManager::Init(const _mapTileAll *map, bool floorPassable[])
 	m_pPlayer->GetEntity()->GetWeaponAttack()->AddAttack(*m_pItemMng->GetAvailableAttacks()->GetWeaponAttackData(WeaponAttackType::normalSlash));
 
 	m_pPlayerCurrentWeaponAttacks = DD_NEW _weaponAttackPosWrapper{};
+	m_pEnemyCurrentWeaponAttacks = DD_NEW _weaponAttackPosWrapper{};
 
 	m_pInGameHoverData = DD_NEW _inGameHoverData{};
 	m_pInGameHoverData->inGameHoverType = InGameHoverType::nothing;
@@ -119,7 +122,9 @@ void	CEntityManager::Clean()
 	DD_DELETE(m_pPlayer);
 	DD_DELETE(m_pItemMng);
 	DD_DELETE(m_pInGameHoverData);
+	DD_DELETE(m_pAI);
 	DD_DELETE(m_pPlayerCurrentWeaponAttacks);
+	DD_DELETE(m_pEnemyCurrentWeaponAttacks);
 }
 
 bool	CEntityManager::InitEnemyIndex()
@@ -172,6 +177,13 @@ bool	CEntityManager::UpdateAI(int playerX, int playerY)
 		return	false;
 	}
 
+	std::vector<int>	&entitiesReadyForAttack{ m_pAI->GetEntitiesReadyForAttack() };
+
+	if (!entitiesReadyForAttack.empty())
+	{
+		ProcessEnemyAttack(entitiesReadyForAttack, playerX, playerY);
+	}
+
 	return	true;
 }
 
@@ -187,6 +199,9 @@ void	CEntityManager::CreateEnemies(const std::vector<_mapPos> *enemies)
 		m_pEnemy->pos.push_back(enemy);
 
 		m_pEnemy->pos.back().id = m_pEnemy->entity.back().GetId(); // overwrite the old id
+
+		m_pEnemy->entity.back().GetEquipped()->SetWeapon(m_pItemMng->GetWeapon(WeaponTypeEx::longSword));
+		m_pEnemy->entity.back().GetWeaponAttack()->AddAttack(*m_pItemMng->GetAvailableAttacks()->GetWeaponAttackData(WeaponAttackType::normalSlash));
 
 		m_pAI->AddEnemy();
 	}
@@ -229,12 +244,104 @@ bool	CEntityManager::DeleteEnemy(const int index)
 		return	false;
 	}
 
+	int enemyID{ m_pEnemy->entity[index].GetId() };
+
+	for (int i = m_pEnemyCurrentWeaponAttacks->pos.size() - 1; i >= 0; --i) 
+	{
+		if (m_pEnemyCurrentWeaponAttacks->pos[i].entityId == enemyID)
+		{
+			m_pEnemyCurrentWeaponAttacks->pos.erase(m_pEnemyCurrentWeaponAttacks->pos.begin() + i);
+		}
+	}
+
 	m_pEnemy->entity[index].Clean();
 
 	m_pEnemy->pos.erase(m_pEnemy->pos.begin() + index);
 	m_pEnemy->entity.erase(m_pEnemy->entity.begin() + index);
 
 	return	true;
+}
+
+void	CEntityManager::ProcessEnemyAttack(std::vector<int> &enemyIndex, int playerX, int playerY)
+{
+	for (size_t i = 0; i < enemyIndex.size(); ++i)
+	{
+		CEntity *Entity = &m_pEnemy->entity[enemyIndex[i]];
+
+		// for now just take the first attack available
+		WeaponAttackType type{ Entity->GetWeaponAttack()->GetWeaponAttackDataC()->at(0).attackType };
+
+		const	CWeapon *weapon{ Entity->GetEquipped()->GetWeaponC() };
+
+		if (Entity->GetWeaponAttack()->IsAttackAvailable(type))
+		{
+			bool attackFailed = false;
+
+			_mapPosWeaponAttack attack{};
+
+			Entity->StartAttack(type, &attack);
+
+			m_pAI->GetAIData().at(enemyIndex[i]).movementDisabled = true;
+
+			attack.speed *= weapon->GetSpeed();
+
+			if (type == WeaponAttackType::normalSlash)
+			{
+				attack.imgIndex = weapon->GetImgIndex();
+
+				int entityX = static_cast<int>(m_pEnemy->pos[enemyIndex[i]].x), entityY = static_cast<int>(m_pEnemy->pos[enemyIndex[i]].y);
+
+				if (entityX >= playerX - 16 && entityX <= playerX + 48)
+				{
+					if (entityY < playerY && entityY > playerY - 62) // player is above the entity
+					{
+						attack.posX = static_cast<float>(entityX), attack.posY = entityY + 32.f;
+						attack.currentValue = 180, attack.direction = WeaponAttackDirection::down;
+					}
+					else if (entityY > playerY + 32 && entityY < playerY + 62) // bellow
+					{
+						attack.posX = entityX - 8.f, attack.posY = entityY - 32.f;
+						attack.currentValue = 0, attack.direction = WeaponAttackDirection::up;
+					}
+					else
+						attackFailed = true;
+				}
+				else if (entityY >= playerY - 16 && entityY <= playerY + 48)
+				{
+					if (entityX < playerX && entityX > playerX - 62) // left
+					{
+						attack.posX = entityX + 32.f, attack.posY = static_cast<float>(entityY);
+						attack.currentValue = 90, attack.direction = WeaponAttackDirection::right;
+					}
+					else if (entityX > playerX + 32 && entityX < playerX + 62) // right
+					{
+						attack.posX = entityX - 32.f, attack.posY = static_cast<float>(entityY);
+						attack.currentValue = -90, attack.direction = WeaponAttackDirection::left;
+					}
+					else
+						attackFailed = true;
+				}
+				else
+				{
+					attackFailed = true;
+				}
+
+				attack.value += attack.currentValue;
+			}
+
+			if (!attackFailed)
+			{
+				m_pEnemyCurrentWeaponAttacks->pos.emplace_back(attack);
+			}
+			else
+			{
+				Entity->GetWeaponAttack()->SetAttackStarted(false);
+				m_pAI->GetAIData().at(enemyIndex[i]).movementDisabled = false;
+			}
+		}
+	}
+
+	enemyIndex.clear();
 }
 
 void	CEntityManager::ProcessPlayerAttack(const KeyboardEvents &key, const _leftRight &lR, const _upDown &uD, float posX, float posY)
@@ -257,8 +364,6 @@ void	CEntityManager::ProcessPlayerAttack(const KeyboardEvents &key, const _leftR
 
 		attack.speed *= weapon->GetSpeed();
 
-		//if (type == WeaponAttackType::tripleArrow) onda dohvacaj arrow sliku GetProjectileNormalImg, i za oruzja gledati slike il je bolje uzimati slike od weapon attack da oni imaju slike
-		// moze slika bita ista kao oruzje, ovo je bolje rjesenje -> onda se moze unutar startattack prebaciti
 		if (type == WeaponAttackType::normalSlash)
 		{
 			attack.imgIndex = weapon->GetImgIndex();
@@ -268,9 +373,9 @@ void	CEntityManager::ProcessPlayerAttack(const KeyboardEvents &key, const _leftR
 			if (uD.state != InputState::nothing)
 			{
 				if (uD.upDown == UpDown::Down)
-					attack.posX = posX, attack.posY = posY + 32, attack.currentValue = 180, attack.direction = WeaponAttackDirection::up;
+					attack.posX = posX, attack.posY = posY + 32, attack.currentValue = 180, attack.direction = WeaponAttackDirection::down;
 				else if (uD.upDown == UpDown::Up)
-					attack.posX = posX - 8, attack.posY = posY - 32, attack.currentValue = 0, attack.direction = WeaponAttackDirection::down;
+					attack.posX = posX - 8, attack.posY = posY - 32, attack.currentValue = 0, attack.direction = WeaponAttackDirection::up;
 			}
 			else if (lR.state != InputState::nothing)
 			{
@@ -287,9 +392,11 @@ void	CEntityManager::ProcessPlayerAttack(const KeyboardEvents &key, const _leftR
 	}
 }
 
-void	CEntityManager::PlayerAttackHit(const int attackIndex, const int enemyIndex)
+void	CEntityManager::PlayerAttackHit(const int attackIndex, const int enemyID)
 {
-	CEntity *Enemy{ GetEnemy(enemyIndex) };
+	int enemyIndex{};
+
+	CEntity *Enemy{ GetEnemyById(enemyID, enemyIndex) };
 
 	if (Enemy == nullptr)
 		return;
@@ -308,10 +415,29 @@ void	CEntityManager::PlayerAttackHit(const int attackIndex, const int enemyIndex
 	}
 }
 
+void	CEntityManager::EnemyAttackHit(int attackIndex)
+{
+	if (attackIndex < 0 || attackIndex >= static_cast<int>(m_pEnemyCurrentWeaponAttacks->pos.size()))
+		return;
+
+	int enemyID{ m_pEnemyCurrentWeaponAttacks->pos[attackIndex].entityId };
+
+	CEntity *Enemy{ GetEnemyById(enemyID) };
+
+	if (Enemy == nullptr)
+		return;
+
+	const CWeapon *Weapon{ Enemy->GetEquipped()->GetWeaponC() };
+
+	int weapAttack{ Weapon->GetAttack() };
+
+	int attack{ static_cast<int>(weapAttack * Enemy->GetWeaponAttack()->GetAttackModifier(m_pEnemyCurrentWeaponAttacks->pos[attackIndex].attackType)) };
+
+	m_pPlayer->GetEntity()->DecreaseHp(attack);
+}
+
 bool	CEntityManager::EnemyDied(const int index)
 {
-	// za sada nema exp, drops itd.
-
 	if (!DeleteEnemy(index))
 		return	false;
 
@@ -549,23 +675,43 @@ void	CEntityManager::DeleteCurrentPlayerWeaponAttack(int	index, bool attackHasEx
 	m_pPlayerCurrentWeaponAttacks->pos.erase(m_pPlayerCurrentWeaponAttacks->pos.begin() + index);
 }
 
-void	CEntityManager::DeleteCurrentWeaponAttack(const int index)
+void	CEntityManager::DeleteCurrentEnemyWeaponAttack(int attackIndex, bool attackHasExpired)
 {
-	if (index < 0 || index >= (int)m_pPlayerCurrentWeaponAttacks->pos.size())
+	if (attackIndex < 0 || attackIndex >= static_cast<int>(m_pEnemyCurrentWeaponAttacks->pos.size()))
 		return;
 
-	EntityType	entityType = m_pPlayerCurrentWeaponAttacks->pos[index].entityType;
+	int enemyId{ m_pEnemyCurrentWeaponAttacks->pos[attackIndex].entityId };
 
-	if (entityType == EntityType::player)
+	int enemyIndex{};
+
+	CEntity *Enemy{ GetEnemyById(enemyId, enemyIndex) };
+
+	if (Enemy == nullptr) // must check if an enemy is still alive because if it's dead it's attack needs to be deleted
 	{
-		m_pPlayer->GetEntity()->GetWeaponAttack()->SetAttackStarted(false);
-	}
-	else if (entityType == EntityType::monster)
-	{
-		GetEnemyById(m_pPlayerCurrentWeaponAttacks->pos[index].entityId)->GetWeaponAttack()->SetAttackStarted(false);
+		for (int i = m_pEnemyCurrentWeaponAttacks->pos.size() - 1; i >= 0; --i) // enemyIndex is -1 so we can not use is for attack deletion
+		{
+			if (m_pEnemyCurrentWeaponAttacks->pos[i].entityId == enemyId)
+			{
+				m_pEnemyCurrentWeaponAttacks->pos.erase(m_pEnemyCurrentWeaponAttacks->pos.begin() + i);
+			}
+		}
+
+		return;
 	}
 
-	m_pPlayerCurrentWeaponAttacks->pos.erase(m_pPlayerCurrentWeaponAttacks->pos.begin() + index);
+	if (!m_pEnemyCurrentWeaponAttacks->pos[enemyIndex].deleteAfterCollision && !attackHasExpired)
+	{
+		return;
+	}
+
+	if (Enemy != nullptr) // Enemy still alive
+	{
+		m_pEnemy->entity[enemyIndex].GetWeaponAttack()->SetAttackStarted(false);
+		
+		m_pAI->GetAIData().at(enemyIndex).movementDisabled = false;
+	}
+
+	m_pEnemyCurrentWeaponAttacks->pos.erase(m_pEnemyCurrentWeaponAttacks->pos.begin() + enemyIndex);
 }
 
 CItemManager*	CEntityManager::GetItemManager()
@@ -588,6 +734,11 @@ _weaponAttackPosWrapper*	CEntityManager::GetCurrentWeaponAttacksForPlayer()
 	return	m_pPlayerCurrentWeaponAttacks;
 }
 
+_weaponAttackPosWrapper*	CEntityManager::GetCurrentWeaponAttacksForEnemy()
+{
+	return	m_pEnemyCurrentWeaponAttacks;
+}
+
 CEntity*	CEntityManager::GetEnemyById(const int id)
 {
 	for (auto& enemy : m_pEnemy->entity)
@@ -595,6 +746,25 @@ CEntity*	CEntityManager::GetEnemyById(const int id)
 		if (enemy.GetId() == id)
 			return	&enemy;
 	}
+
+	return	nullptr;
+}
+
+CEntity*	CEntityManager::GetEnemyById(int id, int &index)
+{
+	std::vector<CEntity>& enemy{ m_pEnemy->entity };
+
+	for (size_t i = 0; i < enemy.size(); ++i)
+	{
+		if (enemy[i].GetId() == id)
+		{
+			index = static_cast<int>(i);
+
+			return	&enemy[i];
+		}
+	}
+
+	index = -1;
 
 	return	nullptr;
 }

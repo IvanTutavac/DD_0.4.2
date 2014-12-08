@@ -318,6 +318,22 @@ void	PathFinding::CPathFinding::GetPath(std::vector<std::pair<int, int>> &path)
 	path = std::move(m_path);
 }
 
+void	PathFinding::CPathFinding::AddWalls(const std::vector<std::pair<int, int>> &walls)
+{
+	for (size_t i = 0; i < walls.size(); ++i)
+	{
+		m_map[walls[i].first][walls[i].second].type = NodeType::wall;
+	}
+}
+
+void	PathFinding::CPathFinding::RemoveWalls(const std::vector<std::pair<int, int>> &walls)
+{
+	for (size_t i = 0; i < walls.size(); ++i)
+	{
+		m_map[walls[i].first][walls[i].second].type = NodeType::map;
+	}
+}
+
 int	PathFinding::CPathFinding::CalcH(int i, int j, int goalI, int goalJ)
 {
 	return	(abs(i - goalI) + abs(j - goalJ)) * 10;

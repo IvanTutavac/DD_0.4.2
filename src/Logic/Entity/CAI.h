@@ -32,6 +32,8 @@ private:
 
 	std::vector<std::pair<int, int>>	m_playerMapPos;
 
+	std::vector<int>					m_entitiesReadyForAttack;
+
 	_attPos	m_playerMeleeAttPosLeft;
 	_attPos	m_playerMeleeAttPosRight;
 	_attPos	m_playerMeleeAttPosUp;
@@ -67,4 +69,5 @@ public:
 	bool	UpdateAI(int playerX, int playerY);
 
 	std::vector<_aiData>&	GetAIData();
+	std::vector<int>&	GetEntitiesReadyForAttack();
 };

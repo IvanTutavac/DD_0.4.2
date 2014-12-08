@@ -171,6 +171,11 @@ _mapPos&	CMap::GetPlayerMapPos()
 	return	m_playerPos;
 }
 
+const _mapPos&	CMap::GetPlayerMapPosC() const
+{
+	return	m_playerPos;
+}
+
 bool	CMap::IsMapSmall()
 {
 	if (m_selectedMap == MapType::small_)

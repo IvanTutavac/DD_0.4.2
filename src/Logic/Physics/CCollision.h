@@ -15,6 +15,7 @@ private:
 	std::vector<_rect>	m_spellRects;
 	std::vector<_rect>	m_enemyRects;
 	std::vector<_rect>	m_itemRects;
+	std::vector<_rect>	m_playerRects;
 
 	// searches every collision rect for both entities 
 	// returns true if there's a collision
@@ -46,5 +47,5 @@ public:
 	// checks for collision between entity1 and entity2
 	// if a collision has been found, the index of those entities will be put in collided
 	void	CheckEntityCollision(const std::vector<_mapPos> *entity1, const std::vector<_mapPos> *entity2, std::vector<std::pair<int, int>> &collided, CollisionType  type);
-	void	CheckWeaponAttackCollision(_weaponAttackPosWrapper *weaponAttack, const std::vector<_mapPos> *entity, std::vector<std::pair<int, int>> &collided);
+	void	CheckWeaponAttackCollision(_weaponAttackPosWrapper *weaponAttack, const std::vector<_mapPos> *entity, std::vector<std::pair<int, int>> &collided, WeaponAttCollType type);
 };
