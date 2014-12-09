@@ -403,8 +403,11 @@ bool	CLogic::ReadGUIAction(CMessage *message, CGUIAction *guiAction)
 			if (!m_pMap->LoadMap("test.DDmap"))
 				return	false;
 
-			m_pMap->SetPlayerX(64.f);
-			m_pMap->SetPlayerY(64.f);
+			_mapPos &playerMapPos{ m_pMap->GetPlayerMapPos() };
+
+			playerMapPos.x = 64.f, playerMapPos.y = 64.f;
+			playerMapPos.previousX = 64.f, playerMapPos.previousY = 64.f;
+			playerMapPos.speed = m_pEntityManager->GetPlayer()->GetEntityC()->GetSpeed();
 
 			m_pEntityManager->CreateEnemies(m_pMap->GetEnemyMapPos());
 
@@ -578,8 +581,6 @@ bool CLogic::GetGUIAction(CMessage *message, CGUIAction *guiAction)
 		{
 			_mapPos	&pos{ m_pMap->GetPlayerMapPos() };
 
-			pos.speed = m_pEntityManager->GetPlayer()->GetEntityC()->GetSpeed();
-
 			m_pMovement->UpdateMapMovePosition(pos, static_cast<float>(InputMsg->x1), static_cast<float>(InputMsg->y1), m_pMap->GetCameraX(), m_pMap->GetCameraY());
 
 			m_playerMovementByMouse = true;
@@ -637,7 +638,6 @@ void	CLogic::Movement(CMessage *message)
 {
 	const _inputMessage	*InputMsg = message->GetInputMsg();
 
-	// trenutno nema provjere da li je dozvoljeno micanje camere
 	if (m_pState->IsGameStateInGame())
 	{
 		UpdateCamera(InputMsg->x1, InputMsg->y1, m_pMap);
@@ -645,16 +645,23 @@ void	CLogic::Movement(CMessage *message)
 		const int mapWidth = m_pMap->GetCurrentMapWidth();
 		const int mapHeight = m_pMap->GetCurrentMapHeight();
 
+		float playerX{ m_pMap->GetPlayerX() }, playerY{ m_pMap->GetPlayerY() };
+
 		if ((InputMsg->leftRight.state == InputState::pressed || InputMsg->upDown.state == InputState::pressed) &&
 			!m_pEntityManager->GetPlayer()->GetEntity()->GetWeaponAttack()->IsAttackStarted() && !m_waitingForAttackDirection)
 		{
-			float playerX{ m_pMap->GetPlayerX() }, playerY{ m_pMap->GetPlayerY() };
+			_mapPos &playerMapPos{ m_pMap->GetPlayerMapPos() };
 
-			m_pMovement->MoveEntity(InputMsg->leftRight, InputMsg->upDown, playerX, playerY, static_cast<float>(m_pEntityManager->GetPlayer()->GetEntityC()->GetSpeed()), m_deltaTime, mapWidth, mapHeight);
+			float tMouseX{}, tMouseY{};
+			float cameraX = m_pMap->GetCameraX(), cameraY = m_pMap->GetCameraY();
+			float tPlayerX = playerX - cameraX + g_windowWidth / 2, tPlayerY = playerY - cameraY + g_windowHeight / 2;
 
-			m_pMap->SetPlayerX(playerX);
-			m_pMap->SetPlayerY(playerY);
+			MapKeyboardMovementToMouse(tMouseX, tMouseY, InputMsg->leftRight, InputMsg->upDown, tPlayerX, tPlayerY);
 
+			m_pMovement->UpdateMapMovePosition(playerMapPos, tMouseX, tMouseY, cameraX, cameraY);
+			
+			m_pMovement->MoveEntity(playerMapPos, m_deltaTime, mapWidth, mapHeight);
+			
 			m_playerMovementByMouse = false;
 		}
 		else if (m_playerMovementByMouse)
@@ -668,7 +675,9 @@ void	CLogic::Movement(CMessage *message)
 		for (size_t i = 0; i < enemyMapPos.size(); ++i)
 		{
 			if (!enemyAIData[i].path.empty())
+			{
 				m_pMovement->MoveEntity(enemyMapPos[i], enemyAIData[i].path, m_deltaTime);
+			}
 		}
 
 		std::vector<int> cleanUpSpells{};
@@ -712,6 +721,34 @@ bool	CLogic::Collision()
 {
 	if (!m_pState->IsGameStateInGame())
 		return true;
+
+	std::vector<std::pair<int, int>> playerCollOnEnemy;
+
+	m_pCollision->CheckEntityCollision(&std::vector < _mapPos > {m_pMap->GetPlayerMapPosC()}, m_pEntityManager->GetEnemyMapPosC(), playerCollOnEnemy, CollisionType::PlayerEnemy);
+
+	if (!playerCollOnEnemy.empty())
+	{
+		_mapPos &playerMapPos{ m_pMap->GetPlayerMapPos() };
+
+		int x = static_cast<int>(playerMapPos.x + (playerMapPos.movX * 0.2 * playerMapPos.speed));
+		int y = static_cast<int>(playerMapPos.y + (playerMapPos.movY * 0.2 * playerMapPos.speed));
+
+		std::vector<_mapPos> &enemyMapPos{ m_pEntityManager->GetEnemyMapPos() };
+		std::vector<_aiData> &aiData{ m_pEntityManager->GetAI()->GetAIData() };
+
+		for (size_t i = 0; i < playerCollOnEnemy.size(); ++i)
+		{
+			if (CCollision::CheckCollision(x, y, static_cast<int>(enemyMapPos[playerCollOnEnemy[i].second].x), static_cast<int>(enemyMapPos[playerCollOnEnemy[i].second].y)))
+			{
+				playerMapPos.x = playerMapPos.previousX;
+				playerMapPos.y = playerMapPos.previousY;
+			}
+
+			aiData[playerCollOnEnemy[i].second].path.clear();
+			//enemyMapPos[playerCollOnEnemy[i].second].x = enemyMapPos[playerCollOnEnemy[i].second].previousX;
+			//enemyMapPos[playerCollOnEnemy[i].second].y = enemyMapPos[playerCollOnEnemy[i].second].previousY;
+		}
+	}
 
 	std::vector<std::pair<int, int>>	collidedSpells;
 
@@ -886,4 +923,66 @@ void	CLogic::MapMouseClickToKeys(const CMessage *Msg, _leftRight &lR, _upDown &u
 		lR.leftRight = LeftRight::Right;
 		lR.state = InputState::pressed;
 	}
+}
+
+void	CLogic::MapKeyboardMovementToMouse(float &mouseX, float &mouseY, const _leftRight &lR, const _upDown &uD, float playerX, float playerY)
+{
+	if (lR.leftRight == LeftRight::Left)
+	{
+		if (uD.upDown == UpDown::Up)
+		{
+			mouseX = playerX - 32;
+			mouseY = playerY - 32;
+		}
+		else if (uD.upDown == UpDown::Down)
+		{
+			mouseX = playerX - 32;
+			mouseY = playerY + 64;
+		}
+		else
+		{
+			mouseX = playerX - 32;
+			mouseY = playerY + 16;
+		}
+	}
+	else if (lR.leftRight == LeftRight::Right)
+	{
+		if (uD.upDown == UpDown::Up)
+		{
+			mouseX = playerX + 32;
+			mouseY = playerY - 32;
+		}
+		else if (uD.upDown == UpDown::Down)
+		{
+			mouseX = playerX + 32;
+			mouseY = playerY + 64;
+		}
+		else
+		{
+			mouseX = playerX + 32;
+			mouseY = playerY + 16;
+		}
+	}
+	else if (uD.upDown == UpDown::Up)
+	{
+		mouseX = playerX + 16;
+		mouseY = playerY - 32;
+	}
+	else if (uD.upDown == UpDown::Down)
+	{
+		mouseX = playerX + 16;
+		mouseY = playerY + 64;
+	}
+
+	if (mouseX < 0)
+		mouseX = 0;
+
+	if (mouseY < 0)
+		mouseY = 0;
+
+	if (mouseX > g_windowHeight)
+		mouseY = static_cast<float>(g_windowHeight);
+
+	if (mouseX > g_windowWidth)
+		mouseX = static_cast<float>(g_windowWidth);
 }

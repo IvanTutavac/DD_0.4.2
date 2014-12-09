@@ -46,6 +46,9 @@ private:
 	double  m_textInputTime; // if its <= 0 process the text input
 	const double m_textInputTimeReset = 0.12;
 
+	float	m_previousPlayerX;
+	float	m_previousPlayerY;
+
 	bool	m_waitingForAttackDirection; // button for attacking is being pressed, direction key press will result into an attack, not movement
 
 	bool	m_playerMovementByMouse;
@@ -80,6 +83,7 @@ private:
 	bool	CastPlayerSpell(const KeyboardEvents &key, float mouseX, float mouseY);
 
 	void	MapMouseClickToKeys(const CMessage *Msg, _leftRight &lR, _upDown &uD);
+	void	MapKeyboardMovementToMouse(float &mouseX, float &mouseY, const _leftRight &lR, const _upDown &uD, float playerX, float playerY);
 
 public:
 

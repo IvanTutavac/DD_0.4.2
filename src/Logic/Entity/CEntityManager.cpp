@@ -199,6 +199,7 @@ void	CEntityManager::CreateEnemies(const std::vector<_mapPos> *enemies)
 		m_pEnemy->pos.push_back(enemy);
 
 		m_pEnemy->pos.back().id = m_pEnemy->entity.back().GetId(); // overwrite the old id
+		m_pEnemy->pos.back().speed = E->GetSpeed();
 
 		m_pEnemy->entity.back().GetEquipped()->SetWeapon(m_pItemMng->GetWeapon(WeaponTypeEx::longSword));
 		m_pEnemy->entity.back().GetWeaponAttack()->AddAttack(*m_pItemMng->GetAvailableAttacks()->GetWeaponAttackData(WeaponAttackType::normalSlash));
@@ -293,12 +294,12 @@ void	CEntityManager::ProcessEnemyAttack(std::vector<int> &enemyIndex, int player
 
 				if (entityX >= playerX - 16 && entityX <= playerX + 48)
 				{
-					if (entityY < playerY && entityY > playerY - 62) // player is above the entity
+					if (entityY <= playerY && entityY > playerY - 62) // player is above the entity
 					{
 						attack.posX = static_cast<float>(entityX), attack.posY = entityY + 32.f;
 						attack.currentValue = 180, attack.direction = WeaponAttackDirection::down;
 					}
-					else if (entityY > playerY + 32 && entityY < playerY + 62) // bellow
+					else if (entityY >= playerY + 32 && entityY < playerY + 62) // bellow
 					{
 						attack.posX = entityX - 8.f, attack.posY = entityY - 32.f;
 						attack.currentValue = 0, attack.direction = WeaponAttackDirection::up;
@@ -308,12 +309,12 @@ void	CEntityManager::ProcessEnemyAttack(std::vector<int> &enemyIndex, int player
 				}
 				else if (entityY >= playerY - 16 && entityY <= playerY + 48)
 				{
-					if (entityX < playerX && entityX > playerX - 62) // left
+					if (entityX <= playerX && entityX > playerX - 62) // left
 					{
 						attack.posX = entityX + 32.f, attack.posY = static_cast<float>(entityY);
 						attack.currentValue = 90, attack.direction = WeaponAttackDirection::right;
 					}
-					else if (entityX > playerX + 32 && entityX < playerX + 62) // right
+					else if (entityX >= playerX + 32 && entityX < playerX + 62) // right
 					{
 						attack.posX = entityX - 32.f, attack.posY = static_cast<float>(entityY);
 						attack.currentValue = -90, attack.direction = WeaponAttackDirection::left;
@@ -327,6 +328,12 @@ void	CEntityManager::ProcessEnemyAttack(std::vector<int> &enemyIndex, int player
 				}
 
 				attack.value += attack.currentValue;
+
+				if (attack.posX < 0)
+					attack.posX = 0;
+
+				if (attack.posY < 0)
+					attack.posY = 0;
 			}
 
 			if (!attackFailed)

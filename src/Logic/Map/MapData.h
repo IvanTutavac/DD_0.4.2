@@ -19,6 +19,7 @@ struct _mapPos
 	float	x, y;
 	float	movX, movY; // used for movement
 	float	endX, endY;
+	float	previousX, previousY;
 	int		index; // img index, used to access the image, type known from the variable (for example, MapPos Enemy; Enemy -> img of type monster)
 	int		id; // entity id, to know which entity is which image
 	int		speed;

@@ -46,6 +46,7 @@ public:
 
 	// checks for collision between entity1 and entity2
 	// if a collision has been found, the index of those entities will be put in collided
-	void	CheckEntityCollision(const std::vector<_mapPos> *entity1, const std::vector<_mapPos> *entity2, std::vector<std::pair<int, int>> &collided, CollisionType  type);
+	// useRects: true - first checks for a tile collision then for collision rects, false - only checks for tile collision
+	void	CheckEntityCollision(const std::vector<_mapPos> *entity1, const std::vector<_mapPos> *entity2, std::vector<std::pair<int, int>> &collided, CollisionType  type, bool useRects = true);
 	void	CheckWeaponAttackCollision(_weaponAttackPosWrapper *weaponAttack, const std::vector<_mapPos> *entity, std::vector<std::pair<int, int>> &collided, WeaponAttCollType type);
 };

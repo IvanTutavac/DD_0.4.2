@@ -49,29 +49,52 @@ void	CCollision::Clean()
 
 }
 
-void	CCollision::CheckEntityCollision(const std::vector<_mapPos> *entity1, const std::vector<_mapPos> *entity2, std::vector<std::pair<int, int>> &collided, CollisionType type)
+void	CCollision::CheckEntityCollision(const std::vector<_mapPos> *entity1, const std::vector<_mapPos> *entity2, std::vector<std::pair<int, int>> &collided, CollisionType type, bool useRects)
 {
 	int i{ 0 }, j{ 0 };
 
-	for (const auto& e1 : *entity1)
+	if (useRects)
 	{
-		for (const auto &e2 : *entity2)
+		for (const auto& e1 : *entity1)
 		{
-			if (CheckCollision((int)e1.x, (int)e1.y, (int)e2.x, (int)e2.y))
+			for (const auto &e2 : *entity2)
 			{
-				if (CheckCollisionEx(e1.index, e2.index, (int)e1.x, (int)e1.y, (int)e2.x, (int)e2.y, type)) // second, more precise checking
+				if (CheckCollision((int)e1.x, (int)e1.y, (int)e2.x, (int)e2.y))
+				{
+					if (CheckCollisionEx(e1.index, e2.index, (int)e1.x, (int)e1.y, (int)e2.x, (int)e2.y, type)) // second, more precise checking
+					{
+						std::pair<int, int> found{ i, j };
+
+						collided.push_back(found);
+					}
+				}
+
+				j++;
+			}
+
+			i++;
+			j = 0;
+		}
+	}
+	else
+	{
+		for (const auto& e1 : *entity1)
+		{
+			for (const auto &e2 : *entity2)
+			{
+				if (CheckCollision((int)e1.x, (int)e1.y, (int)e2.x, (int)e2.y))
 				{
 					std::pair<int, int> found{ i, j };
 
 					collided.push_back(found);
 				}
+
+				j++;
 			}
 
-			j++;
+			i++;
+			j = 0;
 		}
-
-		i++;
-		j = 0;
 	}
 }
 
@@ -137,6 +160,11 @@ bool	CCollision::CheckCollisionEx(int index1, int index2, int x1, int y1, int x2
 	if (type == CollisionType::SpellEnemy)
 	{
 		pRect1 = &m_spellRects[index1].rect;
+		pRect2 = &m_enemyRects[index2].rect;
+	}
+	else if (type == CollisionType::PlayerEnemy)
+	{
+		pRect1 = &m_playerRects[index1].rect;
 		pRect2 = &m_enemyRects[index2].rect;
 	}
 

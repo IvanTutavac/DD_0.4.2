@@ -4,6 +4,12 @@
 #include "../../Tools/StringWrapper.h"
 #include <fstream>
 
+struct _tPos
+{
+	float playerX, playerY;
+	int	  imgIndex;
+};
+
 CMap::CMap()
 {
 
@@ -166,6 +172,11 @@ void	CMap::SetPlayerY(float value)
 	m_playerPos.y = value;
 }
 
+void	CMap::SetPlayerPos(float playerX, float playerY)
+{
+	m_playerPos.x = playerX, m_playerPos.y = playerY;
+}
+
 _mapPos&	CMap::GetPlayerMapPos()
 {
 	return	m_playerPos;
@@ -307,9 +318,15 @@ int		CMap::SaveSelectedMap()
 
 	dat.write((char*)&enemyNum, sizeof(enemyNum));
 
+	_tPos	pos;
+
 	for (const auto& enemy : m_enemies)
 	{
-		dat.write((char*)&enemy, sizeof(enemy));
+		pos.playerX = enemy.x, pos.playerY = enemy.y;
+		pos.imgIndex = enemy.index;
+
+		dat.write((char*)&pos, sizeof(pos));
+		//dat.write((char*)&enemy, sizeof(enemy));
 	}
 
 	dat.clear();
@@ -379,10 +396,15 @@ bool	CMap::LoadMap(const std::string &fileName_)
 	m_enemies.reserve(enemyNum);
 
 	_mapPos	enemy{};
+	_tPos	pos;
 
 	for (size_t i = 0; i < enemyNum; i++)
 	{
-		dat.read((char*)&enemy, sizeof(enemy));
+		dat.read((char*)&pos, sizeof(pos));
+		//dat.read((char*)&enemy, sizeof(enemy));
+
+		enemy.x = pos.playerX, enemy.y = pos.playerY;
+		enemy.index = pos.imgIndex;
 
 		m_enemies.push_back(enemy);
 	}

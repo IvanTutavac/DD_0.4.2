@@ -60,6 +60,8 @@ public:
 	float	GetPlayerY() const;
 	void	SetPlayerY(float value);
 
+	void	SetPlayerPos(float playerX, float playerY);
+
 	_mapPos&	GetPlayerMapPos();
 	const _mapPos&	GetPlayerMapPosC() const;
 

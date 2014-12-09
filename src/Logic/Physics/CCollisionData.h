@@ -4,7 +4,7 @@
 
 enum class CollisionType
 {
-	SpellEnemy
+	SpellEnemy, PlayerEnemy
 };
 
 enum class WeaponAttCollType

@@ -131,6 +131,9 @@ void	CMovement::MoveSpells(std::vector<_mapPos> *position,double deltaTime, int 
 
 bool	CMovement::MoveEntity(_mapPos	&pos, double deltaTime, int mapWidth, int mapHeight, float diff)
 {
+	pos.previousX = pos.x;
+	pos.previousY = pos.y;
+
 	pos.x += static_cast<float>(pos.movX * deltaTime * pos.speed);
 	pos.y += static_cast<float>(pos.movY * deltaTime * pos.speed);
 
@@ -176,8 +179,11 @@ void	CMovement::MoveEntity(_mapPos &pos, std::vector<std::pair<int, int>> &path,
 		pos.endY = endY;
 	}
 
-	pos.x += static_cast<float>(pos.movX *deltaTime * 50); // zamijeniti 50 sa pos.speed
-	pos.y += static_cast<float>(pos.movY * deltaTime * 50);
+	pos.previousX = pos.x;
+	pos.previousY = pos.y;
+
+	pos.x += static_cast<float>(pos.movX *deltaTime * pos.speed);
+	pos.y += static_cast<float>(pos.movY * deltaTime * pos.speed);
 
 	float diffX{ pos.endX - pos.x }, diffY{ pos.endY - pos.y };
 
