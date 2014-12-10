@@ -291,36 +291,61 @@ void	CEntityManager::ProcessEnemyAttack(std::vector<int> &enemyIndex, int player
 				attack.imgIndex = weapon->GetImgIndex();
 
 				int entityX = static_cast<int>(m_pEnemy->pos[enemyIndex[i]].x), entityY = static_cast<int>(m_pEnemy->pos[enemyIndex[i]].y);
+				int	tEntityX = entityX + 16, tEntityY = entityY + 16;
 
-				if (entityX >= playerX - 16 && entityX <= playerX + 48)
+				if (playerX <= tEntityX && playerX >= tEntityX - 60)
 				{
-					if (entityY <= playerY && entityY > playerY - 62) // player is above the entity
+					if (playerX >= tEntityX - 22 && playerY < tEntityY && playerY >= tEntityY - 60) // top
 					{
-						attack.posX = static_cast<float>(entityX), attack.posY = entityY + 32.f;
-						attack.currentValue = 180, attack.direction = WeaponAttackDirection::down;
+						attack.posX = static_cast<float>(entityX), attack.posY = entityY - 32.f, attack.currentValue = 0;
 					}
-					else if (entityY >= playerY + 32 && entityY < playerY + 62) // bellow
+					else if (playerX >= tEntityX - 22 && playerY >= tEntityY && playerY <= tEntityY + 60) // down
 					{
-						attack.posX = entityX - 8.f, attack.posY = entityY - 32.f;
-						attack.currentValue = 0, attack.direction = WeaponAttackDirection::up;
+						attack.posX = static_cast<float>(entityX), attack.posY = entityY + 32.f, attack.currentValue = 180;
+					}
+					else if (playerY >= tEntityY - 60 && playerY < tEntityY - 32) // top left
+					{
+						attack.posX = entityX - 32.f, attack.posY = entityY - 32.f, attack.currentValue = 0;
+					}
+					else if (playerY >= tEntityY - 32 && playerY < tEntityY + 8) // left
+					{
+						attack.posX = entityX - 32.f, attack.posY = static_cast<float>(entityY), attack.currentValue = -90;
+					}
+					else if (playerY >= tEntityY + 8 && playerY < tEntityY + 60) // down left
+					{
+						attack.posX = entityX - 32.f, attack.posY = entityY + 32.f, attack.currentValue = -90;
 					}
 					else
+					{
 						attackFailed = true;
+					}
 				}
-				else if (entityY >= playerY - 16 && entityY <= playerY + 48)
+				else if (playerX > tEntityX && playerX <= tEntityX + 60)
 				{
-					if (entityX <= playerX && entityX > playerX - 62) // left
+					if (playerX <= tEntityX + 6 && playerY < tEntityY && playerY >= tEntityY - 60) // top
 					{
-						attack.posX = entityX + 32.f, attack.posY = static_cast<float>(entityY);
-						attack.currentValue = 90, attack.direction = WeaponAttackDirection::right;
+						attack.posX = static_cast<float>(entityX), attack.posY = entityY - 32.f, attack.currentValue = 0;
 					}
-					else if (entityX >= playerX + 32 && entityX < playerX + 62) // right
+					else if (playerX <= tEntityX + 6 && playerY >= tEntityY && playerY <= tEntityY + 60) // down
 					{
-						attack.posX = entityX - 32.f, attack.posY = static_cast<float>(entityY);
-						attack.currentValue = -90, attack.direction = WeaponAttackDirection::left;
+						attack.posX = static_cast<float>(entityX), attack.posY = entityY + 32.f, attack.currentValue = 180;
+					}
+					else if (playerY >= tEntityY - 60 && playerY < tEntityY - 32) // top right
+					{
+						attack.posX = entityX + 32.f, attack.posY = entityY - 32.f, attack.currentValue = 0;
+					}
+					else if (playerY >= tEntityY - 32 && playerY < tEntityY + 8) // right
+					{
+						attack.posX = entityX + 32.f, attack.posY = static_cast<float>(entityY), attack.currentValue = 90;
+					}
+					else if (playerY >= tEntityY + 8 && playerY < tEntityY + 60) // down right
+					{
+						attack.posX = entityX + 32.f, attack.posY = entityY + 32.f, attack.currentValue = 0;
 					}
 					else
+					{
 						attackFailed = true;
+					}
 				}
 				else
 				{
@@ -380,9 +405,35 @@ void	CEntityManager::ProcessPlayerAttack(const KeyboardEvents &key, const _leftR
 			if (uD.state != InputState::nothing)
 			{
 				if (uD.upDown == UpDown::Down)
-					attack.posX = posX, attack.posY = posY + 32, attack.currentValue = 180, attack.direction = WeaponAttackDirection::down;
+				{
+					if (lR.state != InputState::nothing && lR.leftRight == LeftRight::Left)
+					{
+						attack.posX = posX - 32, attack.posY = posY + 32, attack.currentValue = -90;
+					}
+					else if (lR.state != InputState::nothing && lR.leftRight == LeftRight::Right)
+					{
+						attack.posX = posX + 32, attack.posY = posY + 32, attack.currentValue = 135;
+					}
+					else
+					{
+						attack.posX = posX, attack.posY = posY + 32, attack.currentValue = 180, attack.direction = WeaponAttackDirection::down;
+					}
+				}
 				else if (uD.upDown == UpDown::Up)
-					attack.posX = posX - 8, attack.posY = posY - 32, attack.currentValue = 0, attack.direction = WeaponAttackDirection::up;
+				{
+					if (lR.state != InputState::nothing && lR.leftRight == LeftRight::Left)
+					{
+						attack.posX = posX - 32, attack.posY = posY - 32, attack.currentValue = 0;
+					}
+					else if (lR.state != InputState::nothing && lR.leftRight == LeftRight::Right)
+					{
+						attack.posX = posX + 32, attack.posY = posY - 32, attack.currentValue = 0;
+					}
+					else
+					{
+						attack.posX = posX, attack.posY = posY - 32, attack.currentValue = 0, attack.direction = WeaponAttackDirection::up;
+					}
+				}
 			}
 			else if (lR.state != InputState::nothing)
 			{
