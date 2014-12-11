@@ -41,6 +41,11 @@ private:
 
 	bool	m_floorPassable[IMG_FLOOR_FINISH + 1];
 
+	std::vector<int>	m_currentEnemiesChasing; // contains id of the enemies 
+	int					m_currentEnemiesChasingIndex;
+
+	int		GetNextEnemyIndex();
+
 	// updates m_playerMapPos with tiles over which player is standing
 	void	CalcPlayerMapPos(int playerX, int playerY);
 	void	CalcMeleeAttPosOnPlayer(int playerX, int playerY);

@@ -757,7 +757,7 @@ void	CEntityManager::DeleteCurrentEnemyWeaponAttack(int attackIndex, bool attack
 		return;
 	}
 
-	if (!m_pEnemyCurrentWeaponAttacks->pos[enemyIndex].deleteAfterCollision && !attackHasExpired)
+	if (!m_pEnemyCurrentWeaponAttacks->pos[attackIndex].deleteAfterCollision && !attackHasExpired)
 	{
 		return;
 	}
@@ -769,7 +769,7 @@ void	CEntityManager::DeleteCurrentEnemyWeaponAttack(int attackIndex, bool attack
 		m_pAI->GetAIData().at(enemyIndex).movementDisabled = false;
 	}
 
-	m_pEnemyCurrentWeaponAttacks->pos.erase(m_pEnemyCurrentWeaponAttacks->pos.begin() + enemyIndex);
+	m_pEnemyCurrentWeaponAttacks->pos.erase(m_pEnemyCurrentWeaponAttacks->pos.begin() + attackIndex);
 }
 
 CItemManager*	CEntityManager::GetItemManager()

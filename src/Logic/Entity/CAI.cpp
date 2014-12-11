@@ -28,6 +28,8 @@ bool	CAI::Init()
 {
 	m_pPathFinding = DD_NEW PathFinding::CPathFinding{ m_pMap };
 
+	m_currentEnemiesChasingIndex = -1;
+
 	return	true;
 }
 
@@ -71,7 +73,7 @@ bool	CAI::UpdateAI(int playerX, int playerY)
 	if (m_pEnemy->entity.empty())
 		return	true;
 
-	int entityIndex = 0, endI, endJ;
+	int entityIndex = GetNextEnemyIndex(), endI, endJ;
 
 	if (CheckDistance(playerX, playerY, static_cast<int>(m_pEnemy->pos[entityIndex].x), static_cast<int>(m_pEnemy->pos[entityIndex].y), 45))
 	{
@@ -121,6 +123,55 @@ bool	CAI::UpdateAI(int playerX, int playerY)
 	}
 
 	return	true;
+}
+
+int		CAI::GetNextEnemyIndex()
+{
+	if (m_pEnemy->entity.empty())
+		return	-1;
+
+	while (true)
+	{
+		m_currentEnemiesChasingIndex++;
+
+		if (m_currentEnemiesChasingIndex > 3)
+			m_currentEnemiesChasingIndex = 0;
+
+		std::vector<CEntity>	&Enemy{ m_pEnemy->entity };
+
+		if (m_currentEnemiesChasingIndex >= static_cast<int>(m_currentEnemiesChasing.size()))
+		{
+			for (size_t i = 0; i < Enemy.size(); ++i)
+			{
+				bool	alreadyInList{ false };
+
+				for (size_t j = 0; j < m_currentEnemiesChasing.size(); ++j)
+				{
+					if (Enemy[i].GetId() == m_currentEnemiesChasing[j])
+					{
+						alreadyInList = true;
+					}
+				}
+
+				if (!alreadyInList)
+				{
+					m_currentEnemiesChasing.push_back(Enemy[i].GetId());
+
+					return	m_currentEnemiesChasingIndex;
+				}
+			}
+		}
+		else
+		{
+			for (size_t i = 0; i < Enemy.size(); ++i)
+			{
+				if (m_currentEnemiesChasing[m_currentEnemiesChasingIndex] == Enemy[i].GetId()) // Enemy with such id exists?
+				{
+					return	m_currentEnemiesChasingIndex;
+				}
+			}
+		}
+	}
 }
 
 void	CAI::CalcPlayerMapPos(int playerX, int playerY)
@@ -352,6 +403,14 @@ void	CAI::ClearAttPos(int entityIndex)
 		m_playerMeleeAttPosRight.id = -1, m_playerMeleeAttPosRight.blocked = false;
 	else if (m_playerMeleeAttPosUp.id == id)
 		m_playerMeleeAttPosUp.id = -1, m_playerMeleeAttPosUp.blocked = false;
+
+	for (int i = static_cast<int>(m_currentEnemiesChasing.size() - 1); i >= 0; --i)
+	{
+		if (id == m_currentEnemiesChasing[i])
+		{
+			m_currentEnemiesChasing.erase(m_currentEnemiesChasing.begin() + i);
+		}
+	}
 }
 
 std::vector<_aiData>&	CAI::GetAIData()
